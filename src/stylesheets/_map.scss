@@ -1,0 +1,115 @@
+.map{
+  height: 100%;
+  position: absolute;
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;
+  z-index: 1;
+
+  img{
+    max-width: 999999999px;
+  }
+
+  &-overlay{
+    position: absolute;
+    z-index: 2;
+    width:300px;
+    right:20px;
+    top:50px;
+    display: none;
+    max-height: 90%;
+    max-height:calc(100% - 100px);
+    padding-top:80px;
+
+    &::before{
+      content:"";
+      display: block;
+      position: absolute;
+      top:-10px;
+      left:0;
+      right:0;
+      background:#fff;
+      height:10px;
+    }
+
+    &--show{
+      display: flex;
+    }
+
+    &__search{
+      position: absolute;
+      top:0;
+      left:0;
+      right:0;
+    }
+
+
+    &__police-data{
+      background: #fff;
+      transform: scaleY(0);
+      transform-origin: top;
+      transition:transform 0.3s ease-in-out;
+      width: 100%;
+      overflow: auto;
+
+      &__section{
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        transition-delay: 0.3s;
+        position: relative;
+        padding: 5px 0 5px 40px;
+        cursor: pointer;
+        &::before,
+        &::after
+        {
+          content:"";
+          display: block;
+          position: absolute;
+          left:10px;
+          width:20px;
+          top:5px;
+          bottom:5px;
+        }
+        &::before{
+          background:#efefef;
+        }
+
+        &::after{
+          background:red;
+          opacity: 0;
+        }
+
+        &--active{
+          &::before{
+            opacity: 0;
+          }
+          &::after{
+            opacity: 1;
+          }
+        }
+      }
+
+      &--show{
+        transform: scaleY(1);
+
+        .map-overlay__police-data__section{
+          opacity: 1;
+        }
+      }
+    }
+  }
+
+  &-overlay-toggle{
+    position: absolute;
+    top:20px;
+    right:20px;
+    z-index:2;
+    background:none;
+    border:none;
+
+    svg{
+      width: 20px;
+    }
+  }
+}

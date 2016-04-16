@@ -1,0 +1,40 @@
+html,
+body,
+.container{
+  height: 100%;
+}
+
+*,*::before, *::after{
+  box-sizing: border-box;
+}
+
+body{
+  margin: 0;
+  line-height: 1.5em;
+  @extend %font;
+}
+
+img{
+  max-width:100%;
+}
+
+input{
+  @extend %font;
+}
+
+button{
+  @extend %font;
+}
+
+select{
+  @extend %font;
+}
+
+
+input[type="text"]{
+  width:100%;
+  border:1px solid #efefef;
+  height:45px;
+  padding: 5px;
+  line-height: 35px;
+}

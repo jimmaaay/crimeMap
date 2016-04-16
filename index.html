@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link href='https://fonts.googleapis.com/css?family=Karla:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="/stylesheets/main.min.css" media="screen" title="no title" charset="utf-8">
+</head>
+
+<body>
+
+  <div class="container">
+    <button class="map-overlay-toggle map-overlay-toggle--open"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 290 290" x="0px" xml:space="preserve" y="0px"><rect height="70" width="70" y="220"/><rect height="70" width="70" y="110"/><rect height="70" width="70"/><rect height="70" width="70" x="110" y="220"/><rect height="70" width="70" x="110" y="110"/><rect height="70" width="70" x="110"/><rect height="70" width="70" x="220" y="220"/><rect height="70" width="70" x="220" y="110"/><rect height="70" width="70" x="220"/></svg></button>
+    <div class="map-overlay map-overlay--show">
+      <div class="map-overlay__search">
+        <input type="text" id="input">
+        <select name="year" class="map-overlay__year-select"></select>
+        <select name="month" class="map-overlay__month-select"></select>
+      </div>
+      <div class="map-overlay__police-data"></div>
+    </div>
+
+    <div class="map"></div>
+  </div>
+
+  <script type="text/javascript" src="/js/main.min.js"></script>
+</body>
+
+</html>
