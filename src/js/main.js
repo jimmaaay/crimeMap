@@ -1,6 +1,5 @@
 import Map from "./map.js";
-import * as fetchPolyfill from "whatwg-fetch";
-import Overlay from "./overlay.js";
+import Overlay from  "./overlay.js";
 
 const $map = document.getElementsByClassName("map")[0];
 const mapDefaults = {
@@ -18,12 +17,4 @@ const map = new Map({
   countryCode:"GB"
 });
 
-const overlay = new Overlay();
-
-
-map.on("updated", overlay.locationChanged.bind(overlay));
-map.on("error", function() {
-  console.log(arguments);
-})
-overlay.on("addMarkers", map.addMarkers.bind(map));
-overlay.on("removeMarkers", map.removeMarkers.bind(map));
+const overlay = new Overlay(map);

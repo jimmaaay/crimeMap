@@ -7,46 +7,48 @@ import {
 } from "./police-api.js";
 
 export default class Overlay extends EventEmitter {
-  constructor() {
+  constructor(map) {
+
     super();
-    this.body = document.body;
-    this.$overlay = document.getElementsByClassName("map-overlay")[0];
-    this.$policeData = this.$overlay.getElementsByClassName("map-overlay__police-data")[0];
-    this.$yearSelect = this.$overlay.getElementsByClassName("map-overlay__year-select")[0];
-    this.$monthSelect = this.$overlay.getElementsByClassName("map-overlay__month-select")[0];
-    this.$toggle = document.getElementsByClassName("map-overlay-toggle")[0];
-
-    this.policeData = {
-      showingData: false,
-      requestStart: null,
-      requestEnd: null,
-      crimes: null
+    this.map = map;
+    this.mapData = {
+      place: null,
+      poly:null
     };
-
-    this.$toggle.addEventListener("click", this.toggleClick.bind(this));
-    this.$overlay.addEventListener("click", this.overlayClick.bind(this));
-    this.$overlay.addEventListener("change", this.overlayChange.bind(this));
-    lastUpdated(function(err, res){
-
-      if(!err){
-        let date = res.date.split("-");
-        let year = parseInt(date[0]);
-        let month = parseInt(date[1]) - 1; // account for 0 based
-        let fullDate = new Date(year, month);
-        fullDate.setMonth(fullDate.getMonth() - 1);
-        this.maxDate = {
-          year:fullDate.getFullYear(),
-          month:fullDate.getMonth()
-        };
-        this.$overlay.classList.add("map-overlay--loaded");
-        this.generateDates();
-
+    this.el = {
+      $place:null,
+      $overlay: null,
+      $submit: null,
+      $year: null,
+      $month: null,
+      $policeData:null
+    }
+    this.eventFns = {
+      click: [],
+      change: []
+    }
+    this.possibleDates = null;
+    this.loading = false;
+    this.maxDate = null;
+    this.policeData = {
+      requestEnd:null,
+      requestStart:null,
+      crimes:null
+    }
+    lastUpdated(function(err, obj) {
+      if (!err) {
+        let date = obj.date.split("-").slice(0, 2);
+        date = new Date(date[0], date[1] - 1);
+        this.maxDate = date.getTime();
+        this.init();
       }
-
     }.bind(this));
+
   }
 
-  generateDates(){
+
+
+  generateDates() {
 
     let possibleDates = {};
     let currentDate = new Date(2012, 0);
@@ -54,12 +56,12 @@ export default class Overlay extends EventEmitter {
     let year;
     let month;
     let $options;
-    const endDate = new Date(this.maxDate.year, this.maxDate.month).getTime();
+    const endDate = this.maxDate;
 
-    while(currentDate.getTime() < endDate){
+    while (currentDate.getTime() < endDate) {
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth() + 1; // change to 1 based
-      if(! possibleDates.hasOwnProperty(year)){
+      if (!possibleDates.hasOwnProperty(year)) {
         possibleDates[year] = [];
       }
       possibleDates[year].push(month);
@@ -67,67 +69,63 @@ export default class Overlay extends EventEmitter {
     }
 
     keys = Object.keys(possibleDates);
-    year = keys[keys.length -1];
+    year = keys[keys.length - 1];
     month = possibleDates[year];
     month = month[month.length - 1];
 
 
-    this.$yearSelect.innerHTML = keys.map(function(key) {
+    this.el.$year.innerHTML = keys.map(function(key) {
       return `<option value="${key}">${key}</option>`;
     }).join("");
 
-    $options = this.$yearSelect.getElementsByTagName("option");
-    //console.log();
-    this.$yearSelect.value = $options[$options.length - 1].value;
+    $options = this.el.$year.getElementsByTagName("option");
+    this.el.$year.value = $options[$options.length - 1].value;
     this.possibleDates = possibleDates;
     this.setMonths(year, month);
-    //console.log(month);
-
+    this.currentDate = year + "-" + month;
   }
 
-  setMonths(year, monthToSelect){
+  setMonths(year, monthToSelect) {
     const months = this.possibleDates[year];
 
-    this.$monthSelect.innerHTML = months.map(function(key) {
+    this.el.$month.innerHTML = months.map(function(key) {
       return `<option value="${key}">${key}</option>`;
     }).join("");
 
 
-    if(monthToSelect){
+    if (monthToSelect) {
       let i = monthToSelect;
-      if(! months[monthToSelect -1]){
+      if (!months[monthToSelect - 1]) {
         i = 1;
       }
-      const $months = this.$monthSelect.getElementsByTagName("option");
-      this.$monthSelect.value = i;
+      const $months = this.el.$month.getElementsByTagName("option");
+      this.el.$month.value = i;
     }
 
   }
 
-  createPoly(obj) {
-    const {
-      north,
-      east,
-      south,
-      west
-    } = obj;
-    const poly = `${north},${east}:${south},${east}:${south},${west}:${north},${west}`;
-    return poly;
+
+
+  gotPlace(place) {
+    this.mapData.place = place;
+    this.mapData.poly = this.createPoly(place.geometry.viewport.R.j,place.geometry.viewport.j.R,place.geometry.viewport.R.R,place.geometry.viewport.j.j);
   }
 
-  policeDataCallback(err, res) {
+  mapError() {
+    console.log(arguments);
+  }
 
+  policeDataFn(err, res){
     function changeData(str) {
 
-      this.policeData.showingData = true;
-      this.$policeData.innerHTML = str;
+      this.el.$policeData.innerHTML = str;
       setTimeout(() => { // allows opacity transition to work corretly
-        this.$policeData.classList.add("map-overlay__police-data--show");
+        this.el.$policeData.classList.add("map-overlay__police-data--show");
       }, 50);
     }
 
     if (err) {
-      this.emit("error", err)
+  //    this.emit("error", err)
     } else {
       let crimes = {};
       let str = "";
@@ -167,83 +165,136 @@ export default class Overlay extends EventEmitter {
     }
   }
 
-
-  locationChanged(mapData) {
-    const poly = this.createPoly(mapData.bounds);
-    this.policeData.requestStart = Date.now();
-
-    if (this.policeData.showingData === true) {
-
-      this.$policeData.style.transitionDelay = "0.3s";
-      setTimeout(() => {
-        this.$policeData.classList.remove("map-overlay__police-data--show");
-
-        setTimeout(() => {
-          this.$policeData.style.transitionDelay = null;
-        }, 350);
-
-
-      }, 50);
-
-
-    }
-
-
-    getData({
-      poly,
-      date: "2015-12",
-      callback: this.policeDataCallback.bind(this)
-    });
-
+   createPoly(north, east, south, west) {
+    const poly = `${north},${east}:${south},${east}:${south},${west}:${north},${west}`;
+    return poly;
   }
 
-  // event handlers
-  //=====================================================================================
-  overlayClick(e) {
-    const {
+  submitClick() {
+    if (this.el.$place.value.trim() === "") {
+      console.log("PLEASE SELECT A PLACE");
+    } else {
+      const formattedDate = this.el.$year.value + "-" + this.el.$month.value;
+      this.map.updateMap(this.mapData.place);
+      this.loading = true;
+      this.policeData.requestStart = Date.now();
+      getData({
+        poly:this.mapData.poly,
+        date:formattedDate,
+        callback:this.policeDataFn.bind(this)
+      });
+
+    }
+  }
+
+  dataClick(target){
+    let key = target.getAttribute("data-category");
+    if (target.classList.contains("map-overlay__police-data__section--active")) { // remove markers
+      target.classList.remove("map-overlay__police-data__section--active");
+      this.map.removeMarkers(key);
+    } else { // add markers
+      let crimes = this.policeData.crimes[key].map(function(obj) {
+        return {
+          lat: parseFloat(obj.location.latitude),
+          lng: parseFloat(obj.location.longitude)
+        };
+      });
+      target.classList.add("map-overlay__police-data__section--active");
+      this.map.addMarkers({
+        key,
+        data: crimes
+      });
+    }
+  }
+
+  yearChange() {
+    const year = this.el.$year.value;
+    const month = this.el.$month.value
+    this.setMonths(year, month);
+  }
+
+  // one main eventHandler function
+  eventHandler(root, e) {
+
+    let {
       target
     } = e;
+    const oTarget = target;
+    const fns = this.eventFns[e.type];
+    const _ = this;
 
-    if (target.classList.contains("map-overlay__police-data__section")) {
-      let key = target.getAttribute("data-category");
-      if (target.classList.contains("map-overlay__police-data__section--active")) { // remove markers
-        target.classList.remove("map-overlay__police-data__section--active");
-        this.emit("removeMarkers", key);
-      } else { // add markers
-        let crimes = this.policeData.crimes[key].map(function(obj) {
-          return {
-            lat: parseFloat(obj.location.latitude),
-            lng: parseFloat(obj.location.longitude)
-          };
-        });
-        target.classList.add("map-overlay__police-data__section--active");
-        this.emit("addMarkers", {
-          key,
-          data: crimes
-        });
-      }
+    if (Array.isArray(fns)) {
+      fns.forEach(function(obj) {
+        let found = false;
+        target = oTarget;
 
+        while (!found && !target.isSameNode(root)) {
+
+          if(typeof obj.el === "string"){
+
+            if(target.classList.contains(obj.el)){
+              found = true;
+            }
+            else{
+              target = target.parentElement;
+            }
+          }
+          else{
+            if (target.isSameNode(obj.el)) {
+              found = true;
+            } else {
+              target = target.parentElement;
+            }
+          }
+
+        }
+
+
+        if (found) {
+          obj.fn.call(_, target);
+        }
+      });
     }
 
 
   }
 
-  overlayChange(e){
-    const { target } = e;
-    const isYear = target.classList.contains("map-overlay__year-select");
-    const isMonth  = target.classList.contains("map-overlay__month-select");
+  init() {
+    this.el.$overlay = document.getElementsByClassName("map-overlay")[0];
+    this.el.$submit = this.el.$overlay.getElementsByClassName("map-overlay__button")[0];
+    this.el.$place = this.el.$overlay.getElementsByClassName("map-overlay__input")[0];
+    this.el.$year = this.el.$overlay.getElementsByClassName("map-overlay__year-select")[0];
+    this.el.$month = this.el.$overlay.getElementsByClassName("map-overlay__month-select")[0];
+    this.el.$policeData = this.el.$overlay.getElementsByClassName("map-overlay__police-data")[0];
 
+    this.generateDates();
 
-    if(isYear){
-      this.setMonths(target.value, this.$monthSelect.value);
-    }
+    this.map
+      .on("gotPlace", this.gotPlace.bind(this))
+      .on("error", this.mapError.bind(this));
 
+    // trying something new with event handlers - don't hate
+    this.el.$overlay.addEventListener("click", this.eventHandler.bind(this, this.el.$overlay));
+    this.el.$overlay.addEventListener("change", this.eventHandler.bind(this, this.el.$overlay));
+
+    this.eventFns.change.push({
+      el: this.el.$year,
+      fn: this.yearChange
+    });
+
+    this.eventFns.click.push({
+      el: this.el.$submit,
+      fn: this.submitClick
+    });
+
+    this.eventFns.click.push({
+      el:"map-overlay__police-data__section",
+      fn:this.dataClick
+    })
+
+    this.el.$overlay.classList.add("map-overlay--show");
   }
 
-  toggleClick(e){
-    this.$overlay.classList.toggle("map-overlay--show");
-    e.target.classList.toggle("map-overlay-toggle--open");
-  }
 
-  //=====================================================================================
+
 }

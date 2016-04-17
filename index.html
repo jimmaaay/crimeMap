@@ -10,13 +10,36 @@
 
 <body>
 
+  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 290 290" x="0px" xml:space="preserve" y="0px" style="display:none;">
+    <symbol id="menu" viewBox="0 0 290 290">
+    <rect height="70" width="70" y="220" />
+    <rect height="70" width="70" y="110" />
+    <rect height="70" width="70" />
+    <rect height="70" width="70" x="110" y="220" />
+    <rect height="70" width="70" x="110" y="110" />
+    <rect height="70" width="70" x="110" />
+    <rect height="70" width="70" x="220" y="220" />
+    <rect height="70" width="70" x="220" y="110" />
+    <rect height="70" width="70" x="220" />
+  </symbol>
+  </svg>
+
   <div class="container">
-    <button class="map-overlay-toggle map-overlay-toggle--open"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 290 290" x="0px" xml:space="preserve" y="0px"><rect height="70" width="70" y="220"/><rect height="70" width="70" y="110"/><rect height="70" width="70"/><rect height="70" width="70" x="110" y="220"/><rect height="70" width="70" x="110" y="110"/><rect height="70" width="70" x="110"/><rect height="70" width="70" x="220" y="220"/><rect height="70" width="70" x="220" y="110"/><rect height="70" width="70" x="220"/></svg></button>
-    <div class="map-overlay map-overlay--show">
+    <button class="map-overlay-toggle map-overlay-toggle--open">
+      <svg class="map-overlay-toggle__icon map-overlay-toggle__icon--default" viewBox="0 0 100 125">
+        <use class="menu" xlink:href="#menu" x="0" y="0" />
+      </svg>
+
+      <svg class="map-overlay-toggle__icon map-overlay-toggle__icon--active" viewBox="0 0 100 125">
+        <use class="menu" xlink:href="#menu" x="0" y="0" />
+      </svg>
+    </button>
+    <div class="map-overlay">
       <div class="map-overlay__search">
-        <input type="text" id="input">
+        <input type="text" id="input" class="map-overlay__input">
         <select name="year" class="map-overlay__year-select"></select>
         <select name="month" class="map-overlay__month-select"></select>
+        <button type="button" class="map-overlay__button">Search</button>
       </div>
       <div class="map-overlay__police-data"></div>
     </div>

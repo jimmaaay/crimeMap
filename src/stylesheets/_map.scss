@@ -1,115 +1,146 @@
-.map{
+.map {
   height: 100%;
   position: absolute;
-  top:0;
-  right:0;
-  bottom:0;
-  left:0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 1;
-
-  img{
+  img {
     max-width: 999999999px;
   }
-
-  &-overlay{
+  &-overlay {
     position: absolute;
     z-index: 2;
-    width:300px;
-    right:20px;
-    top:50px;
+    width: 300px;
+    right: 20px;
+    top: 80px;
     display: none;
     max-height: 90%;
-    max-height:calc(100% - 100px);
-    padding-top:80px;
-
-    &::before{
-      content:"";
+    max-height: calc(100% - 160px);
+    padding-top: 80px;
+    &::before {
+      content: "";
       display: block;
       position: absolute;
-      top:-10px;
-      left:0;
-      right:0;
-      background:#fff;
-      height:10px;
+      top: -10px;
+      left: 0;
+      right: 0;
+      background: #fff;
+      height: 90px;
     }
-
-    &--show{
+    &::after {
+      content: "";
+      display: block;
+      position: absolute;
+      top: -20px;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 0 10px 10px;
+      border-color: transparent transparent #fff transparent;
+      right:6px;
+    }
+    &--show {
       display: flex;
     }
-
-    &__search{
+    &__search {
       position: absolute;
-      top:0;
-      left:0;
-      right:0;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 0 10px;
     }
-
-
-    &__police-data{
+    &__police-data {
       background: #fff;
       transform: scaleY(0);
       transform-origin: top;
-      transition:transform 0.3s ease-in-out;
+      transition: transform 0.3s ease-in-out;
       width: 100%;
       overflow: auto;
-
-      &__section{
+      &__section {
         opacity: 0;
         transition: opacity 0.3s ease-in-out;
-        transition-delay: 0.3s;
+        transition-delay: 0.1s;
         position: relative;
         padding: 5px 0 5px 40px;
         cursor: pointer;
         &::before,
-        &::after
-        {
-          content:"";
+        &::after {
+          content: "";
           display: block;
           position: absolute;
-          left:10px;
-          width:20px;
-          top:5px;
-          bottom:5px;
+          left: 10px;
+          width: 20px;
+          top: 5px;
+          bottom: 5px;
         }
-        &::before{
-          background:#efefef;
+        &::before {
+          background: #efefef;
         }
-
-        &::after{
-          background:red;
+        &::after {
+          background: red;
           opacity: 0;
         }
-
-        &--active{
-          &::before{
+        &--active {
+          &::before {
             opacity: 0;
           }
-          &::after{
+          &::after {
             opacity: 1;
           }
         }
       }
-
-      &--show{
+      &--show {
         transform: scaleY(1);
-
-        .map-overlay__police-data__section{
+        .map-overlay__police-data__section {
           opacity: 1;
         }
       }
     }
+
+    &__input-status{
+      position: absolute;
+      right:10px;
+      height:45px;
+      width:45px;
+      top:0;
+    }
   }
-
-  &-overlay-toggle{
+  &-overlay-toggle {
     position: absolute;
-    top:20px;
-    right:20px;
-    z-index:2;
-    background:none;
-    border:none;
-
-    svg{
+    top: 20px;
+    right: 20px;
+    z-index: 2;
+    background: none;
+    border: none;
+    &:focus{
+      outline: none;
+    }
+    svg {
       width: 20px;
     }
+
+    &:hover,
+    &--open{
+      .map-overlay-toggle__icon{
+      &--active{
+      display: block;
+      }
+      &--default{
+        display: none;
+      }
+    }
+    }
+
+    &__icon{
+      &--active{
+        display: none;
+        fill:red;
+      }
+
+
+    }
+
   }
 }

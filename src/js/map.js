@@ -24,8 +24,7 @@ export default class Map extends EventEmitter {
 
   initMap() {
     let settings = Object.assign(this.settings.defaults, {
-      streetViewControl:false,
-      scrollwheel:false
+      streetViewControl:false
     });
     //this.settings.defaults.streetViewControl = false;
 
@@ -47,7 +46,8 @@ export default class Map extends EventEmitter {
     const place = this.autocomplete.getPlace();
 
     if (place.hasOwnProperty("geometry")) {
-      this.updateMap(place);
+      //this.updateMap(place);
+      this.emit("gotPlace", place);
     } else {
       this.emit("error", {
         code: 1,
@@ -124,7 +124,7 @@ export default class Map extends EventEmitter {
   }
 
   removeMarkers(key) {
-
+    
     function clearMarkers(arr) {
       arr.forEach(function(marker) {
         marker.setMap(null);
