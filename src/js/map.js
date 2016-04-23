@@ -23,8 +23,8 @@ export default class Map extends EventEmitter {
   }
 
   initMap() {
-    let settings = Object.assign(this.settings.defaults, {
-      streetViewControl:false
+      let settings = Object.assign(this.settings.defaults, {
+      streetViewControl:false,
     });
     //this.settings.defaults.streetViewControl = false;
 
@@ -83,7 +83,7 @@ export default class Map extends EventEmitter {
         map: this.map,
         fillColor: "#000000",
         fillOpacity: 0,
-        strokeColor: "#FF0000",
+        strokeColor: "#e64c4c",
         strokeOpacity: 0.8,
         strokeWeight: 2
       });
@@ -116,6 +116,9 @@ export default class Map extends EventEmitter {
           lng
         },
         map: this.map,
+        //icon:"/images/location.svg",
+        //animation:google.maps.Animation.DROP
+
       });
 
       this.markers[key].push(marker);
@@ -124,7 +127,7 @@ export default class Map extends EventEmitter {
   }
 
   removeMarkers(key) {
-    
+
     function clearMarkers(arr) {
       arr.forEach(function(marker) {
         marker.setMap(null);

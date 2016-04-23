@@ -5,7 +5,15 @@ export function getData(obj) {
 
   fetch(endpoint +`?poly=${poly}&date=${date}`)
   .then(function(res) {
-    return res.json();
+    if(res.status === 200){
+      return res.json();
+    }
+    else{
+      return {
+        status:res.status,
+        statusText:res.statusText
+      }
+    }
   })
   .then(function(data) {
     callback(null, data);

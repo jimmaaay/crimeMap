@@ -18,3 +18,5 @@ const map = new Map({
 });
 
 const overlay = new Overlay(map);
+
+window.App = overlay;

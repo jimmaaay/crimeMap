@@ -35,6 +35,13 @@ export default class Overlay extends EventEmitter {
       requestStart:null,
       crimes:null
     }
+    this.overlay = {
+      isOpen:false,
+      requestStart:null,
+      requestEnd:null,
+      isClosing:false
+    };
+
     lastUpdated(function(err, obj) {
       if (!err) {
         let date = obj.date.split("-").slice(0, 2);
@@ -121,11 +128,14 @@ export default class Overlay extends EventEmitter {
       this.el.$policeData.innerHTML = str;
       setTimeout(() => { // allows opacity transition to work corretly
         this.el.$policeData.classList.add("map-overlay__police-data--show");
-      }, 50);
+        this.overlay.isOpen = true;
+      }, 0);
     }
 
-    if (err) {
-  //    this.emit("error", err)
+
+    if (err || res.hasOwnProperty("status")) {
+      //    this.emit("error", err)
+      //this.emit("popup","");
     } else {
       let crimes = {};
       let str = "";
@@ -149,17 +159,20 @@ export default class Overlay extends EventEmitter {
       for (let key in crimes) {
         str += `<div class='map-overlay__police-data__section' data-category="${key}">${crimes[key].length} x ${key}</div>`;
       }
-      str += `<p>Total: ${res.length}</p>`
+      str += `<p class="map-overlay__police-data__total">Total: ${res.length}</p>`
 
       requestDiff = this.policeData.requestEnd - this.policeData.requestStart;
       this.policeData.crimes = crimes;
 
-      if (requestDiff < 1000) {
-        setTimeout(() => {
-          changeData.call(this, [str]);
-        }, 1000 - requestDiff);
-      } else {
+    //  if (requestDiff < 1000) {
+      //  setTimeout(() => {
+      if(this.overlay.isClosing === false){
         changeData.call(this, [str]);
+      }
+      else{
+        this.once("OVERLAY-CLOSED", function() {
+          changeData.call(this, [str]);
+        });
       }
 
     }
@@ -178,6 +191,12 @@ export default class Overlay extends EventEmitter {
       this.map.updateMap(this.mapData.place);
       this.loading = true;
       this.policeData.requestStart = Date.now();
+
+      if(this.overlay.isOpen){
+        this.closeOverlay();
+      }
+
+
       getData({
         poly:this.mapData.poly,
         date:formattedDate,
@@ -185,6 +204,30 @@ export default class Overlay extends EventEmitter {
       });
 
     }
+  }
+
+  closeOverlay(){
+    this.map.removeMarkers("all");
+    this.overlay.isClosing = true;
+    this.el.$policeData.classList.add("map-overlay__police-data--closing");
+    this.el.$policeData.style.transitionDelay = "0.1s";
+    setTimeout(()=> {
+      this.el.$policeData.classList.remove("map-overlay__police-data--show");
+    },0);
+
+    setTimeout(()=> {
+        this.el.$policeData.style.transitionDelay = null;
+        this.el.$policeData.classList.remove("map-overlay__police-data--closing");
+
+        setTimeout(()=>{
+          this.overlay.isOpen = false;
+          this.overlay.isClosing = false;
+          this.emit("OVERLAY-CLOSED");
+
+        },400);
+
+    },100);
+
   }
 
   dataClick(target){
