@@ -1,7 +1,13 @@
 import Map from "./map.js";
 import Overlay from  "./overlay.js";
 
+require('es6-promise').polyfill();
+
+
+
+
 const $map = document.getElementsByClassName("map")[0];
+const $input = document.getElementById("input");
 const mapDefaults = {
   center: {
     lat: 52.3942358,
@@ -13,10 +19,10 @@ const mapDefaults = {
 const map = new Map({
   el:$map,
   defaults:mapDefaults,
-  input:document.getElementById("input"),
+  input:$input,
   countryCode:"GB"
 });
 
 const overlay = new Overlay(map);
 
-window.App = overlay;
+$input.value = ""; // fixed bug with firefox

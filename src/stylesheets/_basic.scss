@@ -55,3 +55,16 @@ input[type="text"]{
   padding: 5px;
   line-height: 35px;
 }
+
+
+#error-message{
+  position: fixed;
+  top:0;
+  left:0;
+  right:0;
+  background: #d83651;
+  color: #fff;
+  padding: 10px 15px;
+  text-align: center;
+
+}

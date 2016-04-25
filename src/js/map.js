@@ -2,6 +2,11 @@ import {
   EventEmitter
 } from "events";
 
+import Assign from "object.assign/polyfill";
+import alert from "./popup.js";
+
+const assign = Assign();
+
 export default class Map extends EventEmitter {
   constructor() {
     super();
@@ -34,7 +39,7 @@ export default class Map extends EventEmitter {
   }
 
   initMap() {
-    let settings = Object.assign(this.settings.defaults, {
+    let settings = assign(this.settings.defaults, {
       streetViewControl: false,
     });
     //this.settings.defaults.streetViewControl = false;
@@ -71,6 +76,8 @@ export default class Map extends EventEmitter {
 
   updateMap(obj) {
 
+    if(obj !== null){
+
     const bounds = {
       north: obj.geometry.viewport.R.j,
       east: obj.geometry.viewport.j.R,
@@ -80,6 +87,10 @@ export default class Map extends EventEmitter {
 
     const lat = obj.geometry.location.lat();
     const lng = obj.geometry.location.lng();
+
+    const { north, east, south, west } = bounds;
+
+
 
     obj.bounds = bounds;
 
@@ -118,6 +129,10 @@ export default class Map extends EventEmitter {
     }
 
     this.emit("updated", obj);
+  }
+  else{
+    alert("Try reselecting the place you wish to see data for.")
+  }
   }
 
   addMarkers(obj) {

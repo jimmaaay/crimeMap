@@ -1,3 +1,5 @@
+import 'whatwg-fetch';
+
 const endpoint = "https://data.police.uk/api/crimes-street/all-crime";
 
 export function getData(obj) {

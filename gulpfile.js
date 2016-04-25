@@ -75,7 +75,7 @@ function scripts(watch) {
         .pipe(sourcemaps.init({
           loadMaps: true
         }))
-        .pipe(uglify())
+      //  .pipe(uglify())
         .pipe(rename({
           extname: ".min.js"
         }))

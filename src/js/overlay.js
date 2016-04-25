@@ -6,6 +6,8 @@ import {
   lastUpdated
 } from "./police-api.js";
 
+import alert from "./popup.js";
+
 export default class Overlay extends EventEmitter {
   constructor(map) {
 
@@ -119,7 +121,9 @@ export default class Overlay extends EventEmitter {
   }
 
   mapError() {
+    console.log("map error");
     console.log(arguments);
+    alert("An Unknown Error Occoured");
   }
 
   policeDataFn(err, res){
@@ -134,8 +138,14 @@ export default class Overlay extends EventEmitter {
 
 
     if (err || res.hasOwnProperty("status")) {
-      //    this.emit("error", err)
-      //this.emit("popup","");
+
+      if(res.status == 503){
+        alert("More than 10,000 crimes in this area, please select a smaller area.");
+      }
+      else{
+        alert("An Unknown Error Occoured");
+      }
+
     } else {
       let crimes = {};
       let str = "";
@@ -164,8 +174,7 @@ export default class Overlay extends EventEmitter {
       requestDiff = this.policeData.requestEnd - this.policeData.requestStart;
       this.policeData.crimes = crimes;
 
-    //  if (requestDiff < 1000) {
-      //  setTimeout(() => {
+
       if(this.overlay.isClosing === false){
         changeData.call(this, [str]);
       }
@@ -185,7 +194,7 @@ export default class Overlay extends EventEmitter {
 
   submitClick() {
     if (this.el.$place.value.trim() === "") {
-      console.log("PLEASE SELECT A PLACE");
+      alert("Please select a valid place");
     } else {
       const formattedDate = this.el.$year.value + "-" + this.el.$month.value;
       this.el.$submit.classList.add("map-overlay__button--loading");
@@ -272,7 +281,7 @@ export default class Overlay extends EventEmitter {
         let found = false;
         target = oTarget;
 
-        while (!found && !target.isSameNode(root)) {
+        while (!found && target !== root) {
 
           if(typeof obj.el === "string"){
 
@@ -284,7 +293,7 @@ export default class Overlay extends EventEmitter {
             }
           }
           else{
-            if (target.isSameNode(obj.el)) {
+            if (target === obj.el) {
               found = true;
             } else {
               target = target.parentElement;
@@ -303,6 +312,11 @@ export default class Overlay extends EventEmitter {
 
   }
 
+  toggleClick(e){
+    this.el.$toggle.classList.toggle("map-overlay-toggle--open");
+    this.el.$overlay.classList.toggle("map-overlay--show");
+  }
+
   init() {
     this.el.$overlay = document.getElementsByClassName("map-overlay")[0];
     this.el.$submit = this.el.$overlay.getElementsByClassName("map-overlay__button")[0];
@@ -310,12 +324,16 @@ export default class Overlay extends EventEmitter {
     this.el.$year = this.el.$overlay.getElementsByClassName("map-overlay__year-select")[0];
     this.el.$month = this.el.$overlay.getElementsByClassName("map-overlay__month-select")[0];
     this.el.$policeData = this.el.$overlay.getElementsByClassName("map-overlay__police-data")[0];
+    this.el.$toggle = document.getElementsByClassName("map-overlay-toggle")[0];
 
     this.generateDates();
 
     this.map
       .on("gotPlace", this.gotPlace.bind(this))
       .on("error", this.mapError.bind(this));
+
+
+    this.el.$toggle.addEventListener("click", this.toggleClick.bind(this));
 
     // trying something new with event handlers - don't hate
     this.el.$overlay.addEventListener("click", this.eventHandler.bind(this, this.el.$overlay));
@@ -335,6 +353,8 @@ export default class Overlay extends EventEmitter {
       el:"map-overlay__police-data__section",
       fn:this.dataClick
     })
+
+
 
     this.el.$overlay.classList.add("map-overlay--show");
   }

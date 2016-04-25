@@ -65,6 +65,7 @@
     }
     &--show {
       display: flex;
+      flex-direction: column; // fixes firefox bug where __police-data wasn't going to 100% height
     }
     &__search {
       position: absolute;
@@ -148,6 +149,8 @@
     background: none;
     border: none;
     width: auto;
+    height: 45px;
+
     &:focus{
       outline: none;
     }
