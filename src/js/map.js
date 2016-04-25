@@ -9,6 +9,17 @@ export default class Map extends EventEmitter {
     this.body = document.body;
     this.settings = arguments[0];
     this.markers = {}; // stores markers
+    this.previousSettings = {
+      bounds: {
+        north: null,
+        east: null,
+        south: null,
+        west: null
+      },
+      lat: null,
+      lng: null
+    };
+
     if (!(typeof google === "object" && google.hasOwnProperty("maps"))) { // if no google script
       const script = document.createElement("SCRIPT");
       script.src = "https://maps.googleapis.com/maps/api/js?libraries=places&callback=Map" + date;
@@ -23,8 +34,8 @@ export default class Map extends EventEmitter {
   }
 
   initMap() {
-      let settings = Object.assign(this.settings.defaults, {
-      streetViewControl:false,
+    let settings = Object.assign(this.settings.defaults, {
+      streetViewControl: false,
     });
     //this.settings.defaults.streetViewControl = false;
 
@@ -52,7 +63,7 @@ export default class Map extends EventEmitter {
       this.emit("error", {
         code: 1,
         msg: "No geometry property on place object",
-        data:place
+        data: place
       });
     }
   }
@@ -67,15 +78,23 @@ export default class Map extends EventEmitter {
       west: obj.geometry.viewport.j.j
     };
 
+    const lat = obj.geometry.location.lat();
+    const lng = obj.geometry.location.lng();
+
     obj.bounds = bounds;
 
-    this.map.setOptions({
-      center: {
-        lat: obj.geometry.location.lat(),
-        lng: obj.geometry.location.lng()
-      },
-      zoom: 12
-    });
+    if (this.previousSettings.lat !== lat && this.previousSettings.lng !== lng) {
+      this.previousSettings.lat = lat;
+      this.previousSettings.lng = lng;
+
+      this.map.setOptions({
+        center: {
+          lat: obj.geometry.location.lat(),
+          lng: obj.geometry.location.lng()
+        },
+        zoom: 12
+      });
+    }
 
     if (!this.hasOwnProperty("rectangle")) {
       this.rectangle = new google.maps.Rectangle({
@@ -88,7 +107,13 @@ export default class Map extends EventEmitter {
         strokeWeight: 2
       });
 
-    } else {
+    } else if(north !== this.previousSettings.bounds.north, east !== this.previousSettings.bounds.east, south !== this.previousSettings.bounds.south, west !== this.previousSettings.bounds.west) {
+      this.previousSettings.bounds = {
+        north,
+        east,
+        south,
+        west
+      }
       this.rectangle.setBounds(bounds);
     }
 
@@ -110,8 +135,8 @@ export default class Map extends EventEmitter {
         lat,
         lng
       } = data;
-      const  marker = new google.maps.Marker({
-        position:{
+      const marker = new google.maps.Marker({
+        position: {
           lat,
           lng
         },
@@ -134,13 +159,12 @@ export default class Map extends EventEmitter {
       });
     }
 
-    if(key === "all"){
-      for (let key in this.markers){
+    if (key === "all") {
+      for (let key in this.markers) {
         clearMarkers(this.markers[key]);
       }
       this.markers = [];
-    }
-    else{
+    } else {
       clearMarkers(this.markers[key]);
       //this.markers[key] = [];
       delete this.markers[key];

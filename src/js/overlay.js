@@ -188,6 +188,7 @@ export default class Overlay extends EventEmitter {
       console.log("PLEASE SELECT A PLACE");
     } else {
       const formattedDate = this.el.$year.value + "-" + this.el.$month.value;
+      this.el.$submit.classList.add("map-overlay__button--loading");
       this.map.updateMap(this.mapData.place);
       this.loading = true;
       this.policeData.requestStart = Date.now();
