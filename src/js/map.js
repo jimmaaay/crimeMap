@@ -198,13 +198,29 @@ export default class Map extends EventEmitter {
 
     if (key === "all") throw "can't use the key all";
     if (this.markers.hasOwnProperty(key)) throw "already a property with the key " + key;
+    let prevCoords = [];
     this.markers[key] = [];
 
     data.forEach(function(data) {
-      const {
+
+      let {
         lat,
         lng
       } = data;
+
+      let coords = lat + "-" + lng;
+
+      if(prevCoords.indexOf(coords !== -1)){
+        lat = lat +(Math.random() * 0.0002);
+        lng = lng +(Math.random() * 0.0002);
+        coords = lat + "-" + lng;
+      }
+
+
+
+      prevCoords.push(coords);
+
+        //console.log(lat, lng);
       const marker = new google.maps.Marker({
         position: {
           lat,
