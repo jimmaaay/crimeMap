@@ -26,3 +26,5 @@ const map = new Map({
 const overlay = new Overlay(map);
 
 $input.value = ""; // fixed bug with firefox
+
+window.App = overlay;

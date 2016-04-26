@@ -25,6 +25,27 @@ export default class Map extends EventEmitter {
       lng: null
     };
 
+    // used for working out zoom level
+    let zoomLevelData = {};
+    const tileSize = 256;
+    const initialLatToPx = 256 / 180;
+    const initialLngToPx = 256 / 360;
+    let fakeTileSize = tileSize;
+    let zoom = 0;
+
+    while (zoom < 20) {
+
+      zoomLevelData[zoom] = {
+        latToPx: initialLatToPx * (fakeTileSize / tileSize),
+        lngToPx: initialLngToPx * (fakeTileSize / tileSize)
+      }
+      fakeTileSize = fakeTileSize * 2;
+      zoom++;
+    }
+
+    this.zoomLevelData = zoomLevelData;
+
+
     if (!(typeof google === "object" && google.hasOwnProperty("maps"))) { // if no google script
       const script = document.createElement("SCRIPT");
       script.src = "https://maps.googleapis.com/maps/api/js?libraries=places&callback=Map" + date;
@@ -73,66 +94,95 @@ export default class Map extends EventEmitter {
     }
   }
 
+  getZoom(obj) {
+    // lat north to south
+    //long east to west
+    const { north, east, south, west } = obj
+    const zoomLevelData = this.zoomLevelData;
+    const lngDiff = east - west;
+    const latDiff = north - south;
+
+    function getMaxZoom(key, diff, maxValue) {
+      let loop = true;
+      let maxZoom = 0;
+
+      while(loop){
+        const zoom = maxZoom + 1;
+        const width = diff * zoomLevelData[zoom][key];
+
+        if(width < maxValue){
+          maxZoom = zoom;
+        }
+        else{
+          loop = false;
+        }
+      }
+
+      return maxZoom;
+    }
+
+    const maxLngZoom = getMaxZoom("lngToPx", lngDiff, window.innerWidth);
+    const maxLatZoom = getMaxZoom("latToPx", latDiff, window.innerHeight);
+
+    return Math.min(maxLngZoom, maxLatZoom);
+  }
 
   updateMap(obj) {
 
-    if(obj !== null){
+    if (obj !== null) {
 
-    const bounds = {
-      north: obj.geometry.viewport.R.j,
-      east: obj.geometry.viewport.j.R,
-      south: obj.geometry.viewport.R.R,
-      west: obj.geometry.viewport.j.j
-    };
+      const bounds = obj.geometry.viewport.toJSON();
+      const lat = obj.geometry.location.lat();
+      const lng = obj.geometry.location.lng();
 
-    const lat = obj.geometry.location.lat();
-    const lng = obj.geometry.location.lng();
-
-    const { north, east, south, west } = bounds;
-
-
-
-    obj.bounds = bounds;
-
-    if (this.previousSettings.lat !== lat && this.previousSettings.lng !== lng) {
-      this.previousSettings.lat = lat;
-      this.previousSettings.lng = lng;
-
-      this.map.setOptions({
-        center: {
-          lat: obj.geometry.location.lat(),
-          lng: obj.geometry.location.lng()
-        },
-        zoom: 12
-      });
-    }
-
-    if (!this.hasOwnProperty("rectangle")) {
-      this.rectangle = new google.maps.Rectangle({
-        bounds,
-        map: this.map,
-        fillColor: "#000000",
-        fillOpacity: 0,
-        strokeColor: "#e64c4c",
-        strokeOpacity: 0.8,
-        strokeWeight: 2
-      });
-
-    } else if(north !== this.previousSettings.bounds.north, east !== this.previousSettings.bounds.east, south !== this.previousSettings.bounds.south, west !== this.previousSettings.bounds.west) {
-      this.previousSettings.bounds = {
+      const {
         north,
         east,
         south,
         west
-      }
-      this.rectangle.setBounds(bounds);
-    }
+      } = bounds;
 
-    this.emit("updated", obj);
-  }
-  else{
-    alert("Try reselecting the place you wish to see data for.")
-  }
+
+
+      obj.bounds = bounds;
+
+        this.map.setOptions({
+          center: obj.geometry.viewport.getCenter().toJSON(),
+          zoom: this.getZoom(bounds)
+        });
+
+      if (!this.hasOwnProperty("rectangle")) {
+        this.rectangle = new google.maps.Rectangle({
+          bounds,
+          map: this.map,
+          fillColor: "#000000",
+          fillOpacity: 0,
+          strokeColor: "#e64c4c",
+          strokeOpacity: 0.8,
+          strokeWeight: 2
+        });
+
+        this.previousSettings.bounds = {
+          north,
+          east,
+          south,
+          west
+        }
+
+      } else if (north !== this.previousSettings.bounds.north, east !== this.previousSettings.bounds.east, south !== this.previousSettings.bounds.south, west !== this.previousSettings.bounds.west) {
+        this.previousSettings.bounds = {
+          north,
+          east,
+          south,
+          west
+        }
+        this.rectangle.setBounds(bounds);
+      }
+
+      this.emit("updated", obj);
+    } else {
+      alert("Try reselecting the place you wish to see data for.")
+    }
   }
 
   addMarkers(obj) {
