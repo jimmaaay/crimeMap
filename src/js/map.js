@@ -48,7 +48,12 @@ export default class Map extends EventEmitter {
 
     if (!(typeof google === "object" && google.hasOwnProperty("maps"))) { // if no google script
       const script = document.createElement("SCRIPT");
+      if(window.debug === true){
+        script.src = "https://maps.googleapis.com/maps/api/js?v=3&libraries=places&callback=Map" + date;
+      }
+      else{
       script.src = "https://maps.googleapis.com/maps/api/js?v=3&key=AIzaSyA21Xad94gjpC7J0BIdJgBhE0awlNSJuB4&libraries=places&callback=Map" + date;
+      }
       script.defer = true;
       script.async = true;
       this.body.appendChild(script);
