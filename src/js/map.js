@@ -190,7 +190,8 @@ export default class Map extends EventEmitter {
     }
   }
 
-  addMarkers({key, data, colour:markerColour}) {
+  addMarkers({key, data, colour}) {
+    const markerColour = colour.replace(/#/g, "%23");
     // const {
     //   key,
     //   data
@@ -230,7 +231,7 @@ export default class Map extends EventEmitter {
         },
         map: this.map,
         //icon:"/images/location.svg",
-        icon:`data:image/svg+xml;utf8,<svg id="Capa_1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 21.1 33"><style>.st0{fill:${markerColour};stroke:#000000;stroke-miterlimit:10;}</style><path class="st0" d="M10.6.5C5 .5.5 5 .5 10.5c0 3.6 1.6 8.4 4.9 14.2 2.4 4.3 4.9 7.6 4.9 7.6.1.1.2.1.3.1.1 0 .2-.1.3-.2 0 0 2.5-3.7 4.8-8.2 3.2-6.1 4.9-10.6 4.9-13.6 0-5.4-4.5-9.9-10-9.9zm4.6 10.3c0 2.6-2.1 4.6-4.6 4.6C8 15.4 6 13.3 6 10.8s2-4.7 4.5-4.7c2.6 0 4.7 2.1 4.7 4.7z"/></svg>`
+        icon:`data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" id="Capa_1" width="32" height="32" viewBox="0 0 21.1 33"><style>.st0{fill:${markerColour};stroke:%23000000;stroke-miterlimit:10;}</style><path class="st0" d="M10.6.5C5 .5.5 5 .5 10.5c0 3.6 1.6 8.4 4.9 14.2 2.4 4.3 4.9 7.6 4.9 7.6.1.1.2.1.3.1.1 0 .2-.1.3-.2 0 0 2.5-3.7 4.8-8.2 3.2-6.1 4.9-10.6 4.9-13.6 0-5.4-4.5-9.9-10-9.9zm4.6 10.3c0 2.6-2.1 4.6-4.6 4.6C8 15.4 6 13.3 6 10.8s2-4.7 4.5-4.7c2.6 0 4.7 2.1 4.7 4.7z"/></svg>`
         //animation:google.maps.Animation.DROP
 
       });
