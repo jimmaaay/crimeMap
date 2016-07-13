@@ -116,14 +116,14 @@ export default class Overlay extends EventEmitter {
 
 
   gotPlace(place) {
+    const { north, south, east, west } = place.geometry.viewport.toJSON();
     this.mapData.place = place;
-    this.mapData.poly = this.createPoly(place.geometry.viewport.R.j,place.geometry.viewport.j.R,place.geometry.viewport.R.R,place.geometry.viewport.j.j);
+
+    this.mapData.poly = this.createPoly(north, east, south, west);
   }
 
   mapError() {
-    console.log("map error");
-    console.log(arguments);
-    alert("An Unknown Error Occoured");
+    alert("An Unknown Error Occurred");
   }
 
   policeDataFn(err, res){
