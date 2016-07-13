@@ -38,7 +38,6 @@ function styles() {
       sourceRoot: '/src/stylesheets'
     }))
     .pipe(gulp.dest(CSSDEST))
-    .pipe(livereload());
 }
 
 function scripts(watch) {

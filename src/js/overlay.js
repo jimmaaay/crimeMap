@@ -127,13 +127,53 @@ export default class Overlay extends EventEmitter {
   }
 
   policeDataFn(err, res){
+    const iArray = []; // used for getColour
     function changeData(str) {
 
       this.el.$policeData.innerHTML = str;
       setTimeout(() => { // allows opacity transition to work corretly
         this.el.$policeData.classList.add("map-overlay__police-data--show");
         this.overlay.isOpen = true;
+        this.dataClick(document.querySelector(".map-overlay__police-data__section"));
       }, 0);
+    }
+
+
+    function getColour(i) {
+
+      const whiteListedColours = [
+        //"#780f2d",
+        "#f2c61c",
+        "#e16635",
+        "#bae654",
+        "#fc455e",
+        //"#e64c4c",
+        "#2c967b"
+      ];
+
+      if(iArray.length < whiteListedColours.length){
+        let found = false;
+        while(found === false){
+            const val = Math.floor(Math.random() * whiteListedColours.length);
+            if(iArray.indexOf(whiteListedColours[val]) === -1){
+            iArray.push(whiteListedColours[val]);
+            found = whiteListedColours[val];
+          }
+        }
+
+        return found;
+
+      }
+      else{
+        let hex = (Math.random()*0xFFFFFF<<0).toString(16);//Was sometimes returning hex with less then 6 chars. http://stackoverflow.com/questions/5092808/how-do-i-randomly-generate-html-hex-color-codes-using-javascript
+        if(hex.length !== 6){
+          for ( let i = 0; i <= 6 - hex.length; i++){
+            hex = "0" + hex;
+          }
+        }
+        return "#" + hex;
+      }
+
     }
 
 
@@ -165,9 +205,12 @@ export default class Overlay extends EventEmitter {
         crimes[category].push(data);
       });
 
-
+      let i = 0;
       for (let key in crimes) {
-        str += `<div class='map-overlay__police-data__section' data-category="${key}">${crimes[key].length} x ${key}</div>`;
+        //const colour = '#'+ Math.floor(Math.random()*16777215).toString(16);
+        const colour = getColour(i);
+        str += `<div class='map-overlay__police-data__section' data-category="${key}" data-colour="${colour}"><span></span>${crimes[key].length} x ${key}</div>`;
+        i++;
       }
       str += `<p class="map-overlay__police-data__total">Total: ${res.length}</p>`
 
@@ -244,8 +287,12 @@ export default class Overlay extends EventEmitter {
     let key = target.getAttribute("data-category");
     if (target.classList.contains("map-overlay__police-data__section--active")) { // remove markers
       target.classList.remove("map-overlay__police-data__section--active");
+      target.children[0].style.background = null;
       this.map.removeMarkers(key);
     } else { // add markers
+      const colour = target.getAttribute("data-colour");
+      const child = target.children[0];
+
       let crimes = this.policeData.crimes[key].map(function(obj) {
         return {
           lat: parseFloat(obj.location.latitude),
@@ -253,9 +300,11 @@ export default class Overlay extends EventEmitter {
         };
       });
       target.classList.add("map-overlay__police-data__section--active");
+      target.children[0].style.background = colour;
       this.map.addMarkers({
         key,
-        data: crimes
+        data: crimes,
+        colour
       });
     }
   }
