@@ -1,0 +1,105 @@
+{
+  "type": "FeatureCollection",
+  "query": [
+    "chichester"
+  ],
+  "features": [
+    {
+      "id": "locality.4947944323329070",
+      "type": "Feature",
+      "place_type": [
+        "locality"
+      ],
+      "relevance": 1,
+      "properties": {
+        "wikidata": "Q207639"
+      },
+      "text": "Chichester",
+      "place_name": "Chichester, Chichester, West Sussex, England, United Kingdom",
+      "bbox": [
+        -0.811058186700849,
+        50.8259013486446,
+        -0.753948942848629,
+        50.8631537357878
+      ],
+      "center": [
+        -0.7792,
+        50.8365
+      ],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.7792,
+          50.8365
+        ]
+      },
+      "context": [
+        {
+          "id": "place.6864903279182128",
+          "wikidata": "Q207639",
+          "text": "Chichester"
+        },
+        {
+          "id": "district.12526707758682400",
+          "wikidata": "Q23287",
+          "text": "West Sussex"
+        },
+        {
+          "id": "region.11773787231453920",
+          "short_code": "GB-ENG",
+          "wikidata": "Q21",
+          "text": "England"
+        },
+        {
+          "id": "country.8605848117814600",
+          "short_code": "gb",
+          "wikidata": "Q145",
+          "text": "United Kingdom"
+        }
+      ]
+    },
+    {
+      "id": "locality.5967156679329070",
+      "type": "Feature",
+      "place_type": [
+        "locality"
+      ],
+      "relevance": 1,
+      "properties": {},
+      "text": "Chichester",
+      "place_name": "Chichester, England, United Kingdom",
+      "bbox": [
+        -0.926432498545639,
+        50.7220285746335,
+        -0.749095738714032,
+        50.7767685310345
+      ],
+      "center": [
+        -0.75239,
+        50.75465
+      ],
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.75239,
+          50.75465
+        ]
+      },
+      "context": [
+        {
+          "id": "region.11773787231453920",
+          "short_code": "GB-ENG",
+          "wikidata": "Q21",
+          "text": "England"
+        },
+        {
+          "id": "country.8605848117814600",
+          "short_code": "gb",
+          "wikidata": "Q145",
+          "text": "United Kingdom"
+        }
+      ]
+    }
+  ],
+  "attribution": "NOTICE: © 2019 Mapbox and its suppliers. All rights reserved. Use of this data is subject to the Mapbox Terms of Service (https://www.mapbox.com/about/maps/). This response and the information it contains may not be retained. POI(s) provided by Foursquare."
+}
