@@ -1,6 +1,5 @@
 import { LitElement, html } from 'lit-element';
 import { isValidSearchRequest, makeRequest } from '../geocoding';
-import '../styles/_search-form.scss';
 
 const exampleResponse = require('../geocodingResponse.json');
 
@@ -11,6 +10,8 @@ class SearchForm extends LitElement {
   private inputValue: string;
   private timeout: number; // The timeout ID for the search input debouncer
   private suggestions: any[];
+  
+  public events: any;
 
   static get properties() {
     return { 
@@ -55,15 +56,30 @@ class SearchForm extends LitElement {
     
   }
 
+  optionsClick(e: MouseEvent) {
+    if (!( e.target instanceof HTMLElement)) return;
+    const li = e.target.closest('.search-form__options__item');
+    if (li == null) return;
+    const { id } = (li as HTMLElement).dataset;
+    const item = this.suggestions.find((_) => _.id === id);
+
+    const event = new CustomEvent('searchForm:selected', { detail: item });
+    this.dispatchEvent(event);
+  }
+
   render() {
     return html`
       <form class="search-form" @submit="${this.formSubmit}">
         ${this.errorMessage}
         <input type="search" class="search-form__input" @input="${this.searchInput}" value="${this.inputValue}"/>
         <button type="submit" class="search-form__submit">Search</button>
-        <ul class="search-form__options">
-          ${this.suggestions.map(({ text }) => {
-            return html`<li class="search-form__options__item">${text}</li>`;
+        <ul class="search-form__options" @click="${this.optionsClick}">
+          ${this.suggestions.map(({ text, id }) => {
+            return html`<li
+              data-id="${id}"
+              class="search-form__options__item">
+                ${text}
+              </li>`;
           })}
         </ul>
       </form>
