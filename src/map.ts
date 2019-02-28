@@ -1,4 +1,5 @@
 import * as mapboxgl from 'mapbox-gl';
+import { LngLatBoundsLike } from 'mapbox-gl';
 
 (mapboxgl as any).accessToken = process.env.MAPBOX_ACCESS_TOKEN;
 
@@ -30,7 +31,7 @@ export default () => {
             coordinates: [coordinates]
           }
         }
-      },
+      } as any,
       layout: {},
       paint: {
         'fill-color': '#088',
@@ -40,9 +41,19 @@ export default () => {
 
   }
 
+  /**
+   * Will center and zoom the map based on the bounding box
+   */
+  const fitBounds = (bbox: LngLatBoundsLike) => {
+    map.fitBounds(bbox, {
+      padding: 50,
+    });
+  }
+
 
   return {
     drawBox,
+    fitBounds,
   };
 
 }

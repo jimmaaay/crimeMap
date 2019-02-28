@@ -8,7 +8,7 @@ import './components/SearchForm';
 const ui = document.querySelector('#ui');
 const searchForm = ui.querySelector('search-form');
 
-const { drawBox } = mapInit();
+const { drawBox, fitBounds } = mapInit();
 
 searchForm.addEventListener('searchForm:selected', (e: any) => {
   console.log(e.detail);
@@ -19,4 +19,6 @@ searchForm.addEventListener('searchForm:selected', (e: any) => {
     [bbox[2], bbox[3]],
     [bbox[0], bbox[3]],
   ]);
+
+  fitBounds(bbox);
 });
