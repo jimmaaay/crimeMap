@@ -3,6 +3,12 @@ import { LngLatBoundsLike } from 'mapbox-gl';
 
 (mapboxgl as any).accessToken = process.env.MAPBOX_ACCESS_TOKEN;
 
+
+interface MapMarker {
+  lat: any;
+  lng: any;
+}
+
 export default () => {
 
   const map = new mapboxgl.Map({
@@ -21,7 +27,7 @@ export default () => {
 
     map.addLayer({
       id,
-      type: 'fill',
+      type: 'line',
       source: {
         type: 'geojson',
         data: {
@@ -34,8 +40,10 @@ export default () => {
       } as any,
       layout: {},
       paint: {
-        'fill-color': '#088',
-        'fill-opacity': 0.8
+        // 'fill-color': '#088',
+        // 'fill-opacity': 0.8
+        'line-color': '#088',
+        // 'line-opacity': 0.8,
       },
     });
 
@@ -50,10 +58,27 @@ export default () => {
     });
   }
 
+  /**
+   * Will add an array of markers to the map. 
+   * 
+   * TODO: Should either look at implementing clusters https://docs.mapbox.com/mapbox-gl-js/example/cluster/
+   * or batch add the markers, e.g 10 at a time
+   */
+  const addMarkers = (markers: MapMarker[]) => {
+
+    markers.forEach(({ lat, lng }) => {
+      const marker = new mapboxgl.Marker()
+        .setLngLat([lng, lat])
+        .addTo(map);
+    });
+
+  }
+
 
   return {
     drawBox,
     fitBounds,
+    addMarkers,
   };
 
 }
