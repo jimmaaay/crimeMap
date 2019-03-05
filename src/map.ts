@@ -59,18 +59,55 @@ export default () => {
   }
 
   /**
-   * Will add an array of markers to the map. 
+   * Will add an array of markers to the map.
    * 
-   * TODO: Should either look at implementing clusters https://docs.mapbox.com/mapbox-gl-js/example/cluster/
-   * or batch add the markers, e.g 10 at a time
+   * TODO: Properly add click handler 
+   * @see https://docs.mapbox.com/mapbox-gl-js/example/popup-on-click/
+   * 
+   * Using unusual method for adding markers as its more performant
+   * @see https://stackoverflow.com/a/44360081
    */
   const addMarkers = (markers: MapMarker[]) => {
 
-    markers.forEach(({ lat, lng }) => {
-      const marker = new mapboxgl.Marker()
-        .setLngLat([lng, lat])
-        .addTo(map);
+    const markerLayer: any = {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: markers.map(({ lat, lng }) => {
+          return {
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [lng, lat]
+            },
+          };
+        }),
+      },
+    };
+
+    map.addSource('markers', markerLayer);
+
+    map.addLayer({
+      id: 'markers',
+      type: 'symbol',
+      source: 'markers',
+      layout: {
+        'icon-image': 'car-15',
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+      },
     });
+
+    map
+      .on('click', 'markers', (e) => {
+        console.log(e);
+      })
+      .on('mouseenter', 'markers', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      })
+      .on('mouseleave', 'markers', () => {
+        map.getCanvas().style.cursor = '';
+      });
 
   }
 
