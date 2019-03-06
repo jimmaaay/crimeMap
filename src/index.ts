@@ -3,10 +3,12 @@ import mapInit from './map';
 import { getCrimesByBbox } from './policeAPI';
 
 import './components/SearchForm';
+import './components/MapFilter';
 
 
 const ui = document.querySelector('#ui');
 const searchForm = ui.querySelector('search-form');
+const mapFilter = ui.querySelector('map-filter');
 
 const { drawBox, fitBounds, addMarkers } = mapInit();
 
@@ -30,6 +32,11 @@ searchForm.addEventListener('searchForm:selected', (e: any) => {
         lng: parseFloat(location.longitude),
       };
     });
+
+    const categories = [ ...new Set(data.map(({ category }: any) => category)) ];
+    console.log(categories);
+
+    (mapFilter as any).setCategories(categories);
 
     addMarkers(markerData);
   });
