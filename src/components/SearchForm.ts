@@ -79,6 +79,8 @@ class SearchForm extends LitElement {
     const item = this.suggestions.find((_) => _.id === id);
     const event = new CustomEvent('searchForm:selected', { detail: item });
 
+    
+
     this.inputValue = item.text;
     this.dispatchEvent(event);
   }

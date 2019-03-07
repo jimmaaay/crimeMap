@@ -36,6 +36,8 @@
   "dependencies": {
     "eventemitter3": "^3.1.0",
     "lit-element": "^2.0.1",
-    "mapbox-gl": "^0.53.0"
+    "mapbox-gl": "^0.53.0",
+    "pwa-helpers": "^0.9.1",
+    "redux": "^4.0.1"
   }
 }

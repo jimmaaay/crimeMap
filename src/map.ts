@@ -67,7 +67,7 @@ export default () => {
    * Using unusual method for adding markers as its more performant
    * @see https://stackoverflow.com/a/44360081
    */
-  const addMarkers = (markers: MapMarker[]) => {
+  const setMarkers = (markers: MapMarker[]) => {
 
     const markerLayer: any = {
       type: 'geojson',
@@ -84,6 +84,10 @@ export default () => {
         }),
       },
     };
+
+    try {
+      map.removeSource('markers');
+    } catch {}
 
     map.addSource('markers', markerLayer);
 
@@ -115,7 +119,7 @@ export default () => {
   return {
     drawBox,
     fitBounds,
-    addMarkers,
+    setMarkers,
   };
 
 }

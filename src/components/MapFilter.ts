@@ -1,6 +1,9 @@
+import { connect } from 'pwa-helpers';
 import { LitElement, html } from 'lit-element';
+import { store } from '../store';
+import { removeSelectedCategory, addSelectedCategory } from '../store/actions';
 
-class MapFilter extends LitElement {
+class MapFilter extends connect(store)(LitElement) {
 
   private categories: any[];
   private visibleCategories: any[];
@@ -12,21 +15,22 @@ class MapFilter extends LitElement {
     };
   }
 
-  constructor() {
-    super();
-
-    this.categories = [];
-    this.visibleCategories = [];
-  }
-
-  setCategories(categories: any[]) {
-    this.categories = categories;
+  stateChanged(state: any) {
+    this.categories = state.categories;
+    this.visibleCategories = state.visibleCategories;
   }
 
   inputChange(e: any) {
     const input = e.target.closest('.map-filter__item__input');
     if (input === null) return;
-    console.log(e);
+    const { value, checked } = input;
+    const hasBeenAdded = checked;
+    if (!hasBeenAdded) {
+      store.dispatch(removeSelectedCategory((value)));
+    } else {
+      store.dispatch(addSelectedCategory(value));
+    }
+
   }
 
   render() {
@@ -37,6 +41,7 @@ class MapFilter extends LitElement {
 
           return html`
             <li class="map-filter__item">
+              <label>
               <input 
                 class="map-filter__item__input"
                 type="checkbox"
@@ -45,6 +50,7 @@ class MapFilter extends LitElement {
                 .checked=${isChecked}
               />
               ${name}
+              </label>
             </li>
           `;
         })}

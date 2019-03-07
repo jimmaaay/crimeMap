@@ -1,6 +1,8 @@
 import './styles/main.scss';
 import mapInit from './map';
 import { getCrimesByBbox } from './policeAPI';
+import { store } from './store';
+import { setCategories } from './store/actions';
 
 import './components/SearchForm';
 import './components/MapFilter';
@@ -10,7 +12,7 @@ const ui = document.querySelector('#ui');
 const searchForm = ui.querySelector('search-form');
 const mapFilter = ui.querySelector('map-filter');
 
-const { drawBox, fitBounds, addMarkers } = mapInit();
+const { drawBox, fitBounds, setMarkers } = mapInit();
 
 searchForm.addEventListener('searchForm:selected', (e: any) => {
   const { bbox } = e.detail;
@@ -33,11 +35,17 @@ searchForm.addEventListener('searchForm:selected', (e: any) => {
       };
     });
 
-    const categories = [ ...new Set(data.map(({ category }: any) => category)) ];
-    console.log(categories);
+    const categories: any = [ ...new Set(data.map(({ category }: any) => category)) ];
 
-    (mapFilter as any).setCategories(categories);
+    store.dispatch(setCategories(categories));
+    // console.log(categories);
 
-    addMarkers(markerData);
+    // (mapFilter as any).setCategories(categories);
+
+    setMarkers(markerData);
   });
+});
+
+mapFilter.addEventListener('MapFilter:visibleCategories', (e: any) => {
+  console.log(e.detail);
 });
