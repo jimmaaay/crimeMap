@@ -1,14 +1,18 @@
-import { createStore } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
+import thunk from 'redux-thunk';
 import {
   SET_CATEGORIES,
-  REMOVE_CATEGORY,
-  ADD_CATEGORY,
+  REMOVE_VISIBLE_CATEGORY,
+  ADD_VISIBLE_CATEGORY,
+  SET_LOCATION,
+  GOT_CRIMES,
 } from './constants';
 
 const initialState: any = {
   categories: [],
   visibleCategories: [],
-  bbox: [],
+  location: {},
+  crimes: [],
 };
 
 const reducer = (state = initialState, action: any) => {
@@ -21,7 +25,7 @@ const reducer = (state = initialState, action: any) => {
       return { ...state, categories, visibleCategories: categories };
     }
 
-    case REMOVE_CATEGORY: {
+    case REMOVE_VISIBLE_CATEGORY: {
       const { category } = action;
       const visibleCategories = state.visibleCategories.filter((cat: string) => {
         return cat !== category;
@@ -29,10 +33,18 @@ const reducer = (state = initialState, action: any) => {
       return { ...state, visibleCategories };
     }
 
-    case ADD_CATEGORY: {
+    case ADD_VISIBLE_CATEGORY: {
       const { category } = action;
       const visibleCategories = [ ...state.visibleCategories, category];
       return { ...state, visibleCategories };
+    }
+
+    case SET_LOCATION: {
+      return { ...state, location: action.location };
+    }
+
+    case GOT_CRIMES: {
+      return { ...state, crimes: action.crimes };
     }
 
     default:
@@ -45,5 +57,8 @@ const win: any = window;
 
 export const store = createStore(
   reducer,
-  win.__REDUX_DEVTOOLS_EXTENSION__ && win.__REDUX_DEVTOOLS_EXTENSION__(),
+  compose(
+    applyMiddleware(thunk),
+    win.__REDUX_DEVTOOLS_EXTENSION__ && win.__REDUX_DEVTOOLS_EXTENSION__(),
+  ),
 );

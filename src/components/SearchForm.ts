@@ -1,10 +1,13 @@
 import { LitElement, html, css } from 'lit-element';
+import { connect } from 'pwa-helpers';
 import { isValidSearchRequest, makeRequest } from '../geocoding';
+import { store } from '../store';
+import { setLocation } from '../store/actions';
 
 const exampleResponse = require('../geocodingResponse.json');
 
 console.log(exampleResponse);
-class SearchForm extends LitElement {
+class SearchForm extends connect(store)(LitElement) {
 
   private errorMessage: string;
   private inputValue: string;
@@ -77,12 +80,9 @@ class SearchForm extends LitElement {
     if (li == null) return;
     const { id } = (li as HTMLElement).dataset;
     const item = this.suggestions.find((_) => _.id === id);
-    const event = new CustomEvent('searchForm:selected', { detail: item });
 
-    
-
+    store.dispatch(setLocation(item));
     this.inputValue = item.text;
-    this.dispatchEvent(event);
   }
 
   inputFocus() {

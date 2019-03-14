@@ -1,22 +1,28 @@
 import './styles/main.scss';
+import isEqual from 'lodash/isEqual';
 import mapInit from './map';
-import { getCrimesByBbox } from './policeAPI';
 import { store } from './store';
-import { setCategories } from './store/actions';
+import { setCategories, getCrimes } from './store/actions';
 
 import './components/SearchForm';
 import './components/MapFilter';
 
-
 const ui = document.querySelector('#ui');
-const searchForm = ui.querySelector('search-form');
-const mapFilter = ui.querySelector('map-filter');
 
 const { drawBox, fitBounds, setMarkers } = mapInit();
 
-searchForm.addEventListener('searchForm:selected', (e: any) => {
-  const { bbox } = e.detail;
-  drawBox(e.detail.id, [
+const deepClone = (obj: any): any => JSON.parse(JSON.stringify(obj));
+
+let previousLocation: any = null;
+
+store.subscribe(() => {
+  const { location } = store.getState();
+  if (isEqual(location, previousLocation)) return;
+  previousLocation = deepClone(location);
+
+  const { bbox, id } = location;
+
+  drawBox(id, [
     [bbox[0], bbox[1]],
     [bbox[2], bbox[1]],
     [bbox[2], bbox[3]],
@@ -27,25 +33,20 @@ searchForm.addEventListener('searchForm:selected', (e: any) => {
   ]);
   fitBounds(bbox);
 
-  getCrimesByBbox(bbox).then((data) => {
-    const markerData = data.map(({ location }: any) => {
-      return {
-        lat: parseFloat(location.latitude),
-        lng: parseFloat(location.longitude),
-      };
-    });
+  store.dispatch(getCrimes(bbox));
 
-    const categories: any = [ ...new Set(data.map(({ category }: any) => category)) ];
+  // getCrimesByBbox(bbox).then((data) => {
+  //   const markerData = data.map(({ location }: any) => {
+  //     return {
+  //       lat: parseFloat(location.latitude),
+  //       lng: parseFloat(location.longitude),
+  //     };
+  //   });
 
-    store.dispatch(setCategories(categories));
-    // console.log(categories);
+  //   const categories: any = [ ...new Set(data.map(({ category }: any) => category)) ];
 
-    // (mapFilter as any).setCategories(categories);
-
-    setMarkers(markerData);
-  });
-});
-
-mapFilter.addEventListener('MapFilter:visibleCategories', (e: any) => {
-  console.log(e.detail);
+  //   store.dispatch(setCategories(categories));
+  //   setMarkers(markerData);
+  // });
+  
 });
