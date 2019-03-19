@@ -23,10 +23,16 @@ export default () => {
 
   (window as any).map = map;
 
-  const drawBox = (id: string, coordinates: any[]) => {
+  const drawBox = (coordinates: any[]) => {
+
+    const layerExists = map.getLayer('bbox') !== undefined;
+    const sourceExists = map.getSource('bbox') !== undefined;
+
+    if (layerExists) map.removeLayer('bbox');
+    if (sourceExists) map.removeSource('bbox');
 
     map.addLayer({
-      id,
+      id: 'bbox',
       type: 'line',
       source: {
         type: 'geojson',
@@ -85,9 +91,11 @@ export default () => {
       },
     };
 
-    try {
-      map.removeSource('markers');
-    } catch {}
+    const layerExists = map.getLayer('markers') !== undefined;
+    const sourceExists = map.getSource('markers') !== undefined;
+
+    if (layerExists) map.removeLayer('markers');
+    if (sourceExists) map.removeSource('markers');
 
     map.addSource('markers', markerLayer);
 

@@ -9,12 +9,6 @@ import {
 
 import { getCrimesByBbox } from '../policeAPI';
 
-export const setCategories = (categories: string[]) => {
-  return {
-    categories,
-    type: SET_CATEGORIES,
-  };
-};
 
 export const removeSelectedCategory = (category: string) => {
   return {
@@ -30,7 +24,7 @@ export const addSelectedCategory = (category: string) => {
   };
 };
 
-export const setLocation = (location: any) => {
+const setMapLocation = (location: any) => {
   return {
     location,
     type: SET_LOCATION,
@@ -50,12 +44,24 @@ const gotCrimes = (crimes: any[]) => {
   };
 };
 
-export const getCrimes = (bbox: any) => {
+const setCategories = (categories: string[]) => {
+  return {
+    categories,
+    type: SET_CATEGORIES,
+  };
+};
+
+export const setLocation = (location: any) => {
   return (dispatch: any) => {
+    dispatch(setMapLocation(location));
     dispatch(gettingCrimes());
+
+    const { bbox } = location;
     return getCrimesByBbox(bbox).then((crimes) => {
+      const categories: any = [...new Set(crimes.map(({ category }: any) => category))];
       dispatch(gotCrimes(crimes));
+      dispatch(setCategories(categories));
     });
-  }
+  };
 };
 

@@ -6,6 +6,7 @@ import {
   ADD_VISIBLE_CATEGORY,
   SET_LOCATION,
   GOT_CRIMES,
+  GETTING_CRIMES,
 } from './constants';
 
 const initialState: any = {
@@ -41,6 +42,10 @@ const reducer = (state = initialState, action: any) => {
 
     case SET_LOCATION: {
       return { ...state, location: action.location };
+    }
+
+    case GETTING_CRIMES: {
+      return { ...state, crimes:[], categories: [], visibleCategories: []}
     }
 
     case GOT_CRIMES: {
