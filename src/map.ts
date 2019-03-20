@@ -26,32 +26,39 @@ export default () => {
   const drawBox = (coordinates: any[]) => {
 
     const layerExists = map.getLayer('bbox') !== undefined;
-    const sourceExists = map.getSource('bbox') !== undefined;
-
-    if (layerExists) map.removeLayer('bbox');
-    if (sourceExists) map.removeSource('bbox');
-
-    map.addLayer({
-      id: 'bbox',
-      type: 'line',
-      source: {
+    const source = map.getSource('bbox') as mapboxgl.GeoJSONSource || undefined;
+    const sourceData: any = {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [coordinates]
+      }
+    };
+  
+    if (source === undefined) {
+      const bboxSource: any = {
         type: 'geojson',
-        data: {
-          type: 'Feature',
-          geometry: {
-            type: 'Polygon',
-            coordinates: [coordinates]
-          }
-        }
-      } as any,
-      layout: {},
-      paint: {
-        // 'fill-color': '#088',
-        // 'fill-opacity': 0.8
-        'line-color': '#088',
-        // 'line-opacity': 0.8,
-      },
-    });
+        data: sourceData,
+      };
+
+      map.addSource('bbox', bboxSource);
+    } else {
+      source.setData(sourceData)
+    }
+
+    if (!layerExists) {
+      map.addLayer({
+        id: 'bbox',
+        type: 'line',
+        source: 'bbox',
+        layout: {},
+        paint: {
+          'line-color': '#088',
+        },
+      });
+    }
+
+
 
   }
 
@@ -75,40 +82,43 @@ export default () => {
    */
   const setMarkers = (markers: MapMarker[]) => {
 
-    const markerLayer: any = {
-      type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: markers.map(({ lat, lng }) => {
-          return {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: [lng, lat]
-            },
-          };
-        }),
-      },
+    const layerExists = map.getLayer('markers') !== undefined;
+    const source = map.getSource('markers') as mapboxgl.GeoJSONSource || undefined;
+    const markerSourceData: any = {
+      type: 'FeatureCollection',
+      features: markers.map(({ lat, lng }) => {
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [lng, lat]
+          },
+        };
+      }),
     };
 
-    const layerExists = map.getLayer('markers') !== undefined;
-    const sourceExists = map.getSource('markers') !== undefined;
+    if (source === undefined) {
+      const markerSource: any = {
+        type: 'geojson',
+        data: markerSourceData,
+      };
+      map.addSource('markers', markerSource);
+    } else {
+      source.setData(markerSourceData);
+    }
 
-    if (layerExists) map.removeLayer('markers');
-    if (sourceExists) map.removeSource('markers');
-
-    map.addSource('markers', markerLayer);
-
-    map.addLayer({
-      id: 'markers',
-      type: 'symbol',
-      source: 'markers',
-      layout: {
-        'icon-image': 'car-15',
-        'icon-allow-overlap': true,
-        'icon-ignore-placement': true,
-      },
-    });
+    if (!layerExists) {
+      map.addLayer({
+        id: 'markers',
+        type: 'symbol',
+        source: 'markers',
+        layout: {
+          'icon-image': 'car-15',
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true,
+        },
+      });
+    }
 
     map
       .on('click', 'markers', (e) => {
