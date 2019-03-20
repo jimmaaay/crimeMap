@@ -1,5 +1,6 @@
 import * as mapboxgl from 'mapbox-gl';
 import { LngLatBoundsLike } from 'mapbox-gl';
+import markerUrl from './marker.png';
 
 (mapboxgl as any).accessToken = process.env.MAPBOX_ACCESS_TOKEN;
 
@@ -9,7 +10,9 @@ interface MapMarker {
   lng: any;
 }
 
-export default () => {
+export default async () => {
+  const image = await fetch(markerUrl);
+  console.log(image);
 
   const map = new mapboxgl.Map({
     container: 'map',
@@ -57,8 +60,6 @@ export default () => {
         },
       });
     }
-
-
 
   }
 
