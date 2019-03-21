@@ -11,8 +11,41 @@ interface MapMarker {
 }
 
 export default async () => {
-  const image = await fetch(markerUrl);
-  console.log(image);
+  const canvas = new (window as any).OffscreenCanvas(480, 480);
+  const ctx = canvas.getContext('2d');
+  const image = new Image();
+
+  const markerData: any = await new Promise((resolve) => {
+    image.onload = () => {
+      ctx.drawImage(image, 0, 0);
+      // resolve(canvas.convertToBlob());
+      const imageData = ctx.getImageData(0, 0, 480, 480);
+      resolve(imageData);
+      // resolve(new Blob([imageData.data], { type: 'image/png' }));
+      // resolve(imageData);
+    }
+
+    image.src = markerUrl;
+  });
+
+  const data = markerData;
+
+
+  // const redMarkerData = new Uint8ClampedArray(markerData.);
+  // for (let i = 0; i < redMarkerData.length; i = i + 4) {
+  //   const r = redMarkerData[i];
+  //   // const g = redMarkerData[i + 1];
+  //   // const b = redMarkerData[i + 2];
+  //   const a = redMarkerData[i + 3];
+
+  //   if (a !== 0) redMarkerData[i] = 255;
+  // }
+
+  // const blob = new Blob([new Uint8Array(markerData.data)], { type: 'image/png' });
+
+  // const url = window.URL.createObjectURL(markerData);
+  // console.log(url);
+  
 
   const map = new mapboxgl.Map({
     container: 'map',
@@ -23,6 +56,8 @@ export default async () => {
       54.620976,
     ],
   });
+
+  map.addImage('gradient', {width: 480, height: 480, data: data});
 
   (window as any).map = map;
 
@@ -114,7 +149,7 @@ export default async () => {
         type: 'symbol',
         source: 'markers',
         layout: {
-          'icon-image': 'car-15',
+          'icon-image': 'gradient',
           'icon-allow-overlap': true,
           'icon-ignore-placement': true,
         },
