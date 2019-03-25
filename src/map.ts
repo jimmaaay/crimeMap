@@ -8,44 +8,34 @@ import markerUrl from './marker.png';
 interface MapMarker {
   lat: any;
   lng: any;
+  category: string;
+}
+
+const createColouredMarker = (
+  image: HTMLImageElement,
+  colour: string
+) => {
+  const { width, height } = image;
+  const canvas = new (window as any).OffscreenCanvas(width, height);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(image, 0, 0);
+  ctx.globalCompositeOperation = 'source-in';
+  ctx.fillStyle = colour;
+  ctx.fillRect(0, 0, width, height);
+
+  const imageData: ImageData = ctx.getImageData(0, 0, width, height);
+  return {
+    width,
+    height,
+    imageData,
+  };
 }
 
 export default async () => {
-  const canvas = new (window as any).OffscreenCanvas(480, 480);
-  const ctx = canvas.getContext('2d');
   const image = new Image();
-
-  const markerData: any = await new Promise((resolve) => {
-    image.onload = () => {
-      ctx.drawImage(image, 0, 0);
-      // resolve(canvas.convertToBlob());
-      const imageData = ctx.getImageData(0, 0, 480, 480);
-      resolve(imageData);
-      // resolve(new Blob([imageData.data], { type: 'image/png' }));
-      // resolve(imageData);
-    }
-
-    image.src = markerUrl;
-  });
-
-  const data = markerData;
-
-
-  // const redMarkerData = new Uint8ClampedArray(markerData.);
-  // for (let i = 0; i < redMarkerData.length; i = i + 4) {
-  //   const r = redMarkerData[i];
-  //   // const g = redMarkerData[i + 1];
-  //   // const b = redMarkerData[i + 2];
-  //   const a = redMarkerData[i + 3];
-
-  //   if (a !== 0) redMarkerData[i] = 255;
-  // }
-
-  // const blob = new Blob([new Uint8Array(markerData.data)], { type: 'image/png' });
-
-  // const url = window.URL.createObjectURL(markerData);
-  // console.log(url);
-  
+  let imageLoaded = false;
+  image.onload = () => imageLoaded = true;
+  image.src = markerUrl;
 
   const map = new mapboxgl.Map({
     container: 'map',
@@ -57,7 +47,7 @@ export default async () => {
     ],
   });
 
-  map.addImage('gradient', {width: 480, height: 480, data: data});
+  const existingMarkers: string[] = [];
 
   (window as any).map = map;
 
@@ -117,17 +107,43 @@ export default async () => {
    * @see https://stackoverflow.com/a/44360081
    */
   const setMarkers = (markers: MapMarker[]) => {
+    const categories = markers.map(({ category }) => category);
+    const categoryMarkers = [ ...new Set(categories) ];
+
+    const markerCategoriesToAdd = categoryMarkers
+      .filter((category) => !existingMarkers.includes(category)); 
+
+    markerCategoriesToAdd.forEach((category) => {
+      const r = Math.floor(Math.random() * 256);
+      const g = Math.floor(Math.random() * 256);
+      const b = Math.floor(Math.random() * 256);
+
+      // TODO: Have the category colours defined in the store, so UI can show a legend
+      const colour = `rgb(${r}, ${g}, ${b})`;
+      const { imageData, width, height } = createColouredMarker(image, colour);
+
+      map.addImage(
+        `category-${category}`,
+        { width, height, data: imageData.data },
+        { pixelRatio: 2 },
+      );
+
+      existingMarkers.push(category);
+    });
 
     const layerExists = map.getLayer('markers') !== undefined;
     const source = map.getSource('markers') as mapboxgl.GeoJSONSource || undefined;
     const markerSourceData: any = {
       type: 'FeatureCollection',
-      features: markers.map(({ lat, lng }) => {
+      features: markers.map(({ lat, lng, category }, i) => {
         return {
           type: 'Feature',
           geometry: {
             type: 'Point',
             coordinates: [lng, lat]
+          },
+          properties: {
+            'marker-category': category,
           },
         };
       }),
@@ -149,7 +165,7 @@ export default async () => {
         type: 'symbol',
         source: 'markers',
         layout: {
-          'icon-image': 'gradient',
+          'icon-image': 'category-{marker-category}',
           'icon-allow-overlap': true,
           'icon-ignore-placement': true,
         },
