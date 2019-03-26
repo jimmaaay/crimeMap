@@ -1,6 +1,7 @@
 import * as mapboxgl from 'mapbox-gl';
 import { LngLatBoundsLike } from 'mapbox-gl';
 import markerUrl from './marker.png';
+import { store } from './store';
 
 (mapboxgl as any).accessToken = process.env.MAPBOX_ACCESS_TOKEN;
 
@@ -107,6 +108,7 @@ export default async () => {
    * @see https://stackoverflow.com/a/44360081
    */
   const setMarkers = (markers: MapMarker[]) => {
+    const { categories: categoriesObj } = store.getState();
     const categories = markers.map(({ category }) => category);
     const categoryMarkers = [ ...new Set(categories) ];
 
@@ -114,12 +116,7 @@ export default async () => {
       .filter((category) => !existingMarkers.includes(category)); 
 
     markerCategoriesToAdd.forEach((category) => {
-      const r = Math.floor(Math.random() * 256);
-      const g = Math.floor(Math.random() * 256);
-      const b = Math.floor(Math.random() * 256);
-
-      // TODO: Have the category colours defined in the store, so UI can show a legend
-      const colour = `rgb(${r}, ${g}, ${b})`;
+      const colour = categoriesObj[category].markerColour;
       const { imageData, width, height } = createColouredMarker(image, colour);
 
       map.addImage(

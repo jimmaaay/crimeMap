@@ -10,7 +10,8 @@ import {
 } from './constants';
 
 const initialState: any = {
-  categories: [],
+  categories: {},
+  categoryNames: [],
   visibleCategories: [],
   location: {},
   crimes: [],
@@ -23,7 +24,29 @@ const reducer = (state = initialState, action: any) => {
 
     case SET_CATEGORIES: {
       const { categories } = action;
-      return { ...state, categories, visibleCategories: categories };
+      const categoriesObj = { ...state.categories };
+      const currentCategories = Object.keys(categoriesObj);
+      const categoriesToAdd = categories.filter((category: string) => {
+        return !currentCategories.includes(category);
+      });
+
+      categoriesToAdd.forEach((category: string) => {
+        const r = Math.floor(Math.random() * 256);
+        const g = Math.floor(Math.random() * 256);
+        const b = Math.floor(Math.random() * 256);
+        const colour = `rgb(${r}, ${g}, ${b})`;
+
+        categoriesObj[category] = {
+          markerColour: colour,
+        };
+      });
+
+      return {
+        ...state,
+        categories: categoriesObj,
+        categoryNames: categories,
+        visibleCategories: categories,
+      };
     }
 
     case REMOVE_VISIBLE_CATEGORY: {
@@ -45,7 +68,7 @@ const reducer = (state = initialState, action: any) => {
     }
 
     case GETTING_CRIMES: {
-      return { ...state, crimes:[], categories: [], visibleCategories: []}
+      return { ...state, crimes:[], categoryNames: [], visibleCategories: []}
     }
 
     case GOT_CRIMES: {

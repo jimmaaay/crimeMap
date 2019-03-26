@@ -1,23 +1,62 @@
 import { connect } from 'pwa-helpers';
-import { LitElement, html } from 'lit-element';
+import { LitElement, html, css } from 'lit-element';
 import { store } from '../store';
 import { removeSelectedCategory, addSelectedCategory } from '../store/actions';
 
 class MapFilter extends connect(store)(LitElement) {
 
-  private categories: any[];
+  private categoryNames: any[];
   private visibleCategories: any[];
+  private categories: any;
 
   static get properties() {
     return { 
-      categories: { type: Array },
+      categoryNames: { type: Array },
       visibleCategories: { type: Array },
+      categories: { type: Object },
     };
   }
 
+  static styles = css`
+    .map-filter {
+      margin: 0;
+      padding: 0;
+    }
+
+    .map-filter__item {
+      display: block;
+    }
+
+    .map-filter__item__label {
+      display: block;
+    }
+
+    .map-filter__item__label::before {
+      content: '';
+      display: inline-block;
+      width: 2rem;
+      height: 2rem;
+      background: var(--color);
+      vertical-align: middle;
+    }
+
+    .map-filter__item__input:checked + .map-filter__item__fake-checkbox {
+      background: red;
+    }
+
+    .map-filter__item__fake-checkbox {
+      display: inline-block;
+      width: 3rem;
+      height: 3rem;
+      border: 2px solid #fff;
+      background: #fff;
+    }
+  `;
+
   stateChanged(state: any) {
-    this.categories = state.categories;
+    this.categoryNames = state.categoryNames;
     this.visibleCategories = state.visibleCategories;
+    this.categories = state.categories;
   }
 
   inputChange(e: any) {
@@ -36,20 +75,22 @@ class MapFilter extends connect(store)(LitElement) {
   render() {
     return html`
       <ul class="map-filter" @change="${this.inputChange}">
-        ${this.categories.map((name) => {
+        ${this.categoryNames.map((name) => {
           const isChecked = this.visibleCategories.includes(name);
+          const { markerColour } = this.categories[name];
 
           return html`
             <li class="map-filter__item">
-              <label>
-              <input 
-                class="map-filter__item__input"
-                type="checkbox"
-                value="${name}"
-                name="map-filter"
-                .checked=${isChecked}
-              />
-              ${name}
+              <label class="map-filter__item__label" style="--color:${markerColour}">
+                <input 
+                  class="map-filter__item__input"
+                  type="checkbox"
+                  value="${name}"
+                  name="map-filter"
+                  .checked=${isChecked}
+                />
+                <span class="map-filter__item__fake-checkbox"></span>
+                ${name}
               </label>
             </li>
           `;
