@@ -10,6 +10,7 @@ interface MapMarker {
   lat: any;
   lng: any;
   category: string;
+  persistendID: string;
 }
 
 const createColouredMarker = (
@@ -132,7 +133,7 @@ export default async () => {
     const source = map.getSource('markers') as mapboxgl.GeoJSONSource || undefined;
     const markerSourceData: any = {
       type: 'FeatureCollection',
-      features: markers.map(({ lat, lng, category }, i) => {
+      features: markers.map(({ lat, lng, category, persistendID }, i) => {
         return {
           type: 'Feature',
           geometry: {
@@ -140,6 +141,7 @@ export default async () => {
             coordinates: [lng, lat]
           },
           properties: {
+            persistendID,
             'marker-category': category,
           },
         };
@@ -169,18 +171,19 @@ export default async () => {
       });
     }
 
-    map
-      .on('click', 'markers', (e) => {
-        console.log(e);
-      })
-      .on('mouseenter', 'markers', () => {
-        map.getCanvas().style.cursor = 'pointer';
-      })
-      .on('mouseleave', 'markers', () => {
-        map.getCanvas().style.cursor = '';
-      });
-
   }
+
+
+  map
+    .on('click', 'markers', (e) => {
+      console.log(e, e.features);
+    })
+    .on('mouseenter', 'markers', () => {
+      map.getCanvas().style.cursor = 'pointer';
+    })
+    .on('mouseleave', 'markers', () => {
+      map.getCanvas().style.cursor = '';
+    });
 
 
   return {

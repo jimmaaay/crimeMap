@@ -32,11 +32,12 @@ import './components/MapFilter';
     const { crimes } = store.getState();
     const markerData = crimes
       .filter(({ category }: any) => categories.includes(category))
-      .map(({ location, category }: any) => {
+      .map(({ location, category, persistent_id }: any) => {
         return {
           category,
           lat: parseFloat(location.latitude),
           lng: parseFloat(location.longitude),
+          persistendID: persistent_id,
         };
       });
     setMarkers(markerData);
