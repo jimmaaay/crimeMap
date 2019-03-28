@@ -7,14 +7,17 @@ import {
   SET_LOCATION,
   GOT_CRIMES,
   GETTING_CRIMES,
+  SET_POLICE_API_LAST_UPDATED,
 } from './constants';
 
 const initialState: any = {
   categories: {},
   categoryNames: [],
-  visibleCategories: [],
-  location: {},
+  visibleCategories: [], // normally array
+  location: {}, // normally object
   crimes: [],
+
+  policeAPILastUpdated: null,
 };
 
 const reducer = (state = initialState, action: any) => {
@@ -73,6 +76,16 @@ const reducer = (state = initialState, action: any) => {
 
     case GOT_CRIMES: {
       return { ...state, crimes: action.crimes };
+    }
+
+    case SET_POLICE_API_LAST_UPDATED: {
+      const dateRegex = /^(?<year>\d{4})-(?<month>\d{2})-\d{2}/.exec(action.date);
+      const date = {
+        // -1 as js has 0 based indexes for months
+        month: parseInt(dateRegex.groups.month, 10) - 1,
+        year: parseInt(dateRegex.groups.year, 10),
+      };
+      return { ...state, date };
     }
 
     default:

@@ -5,6 +5,7 @@ import {
   SET_LOCATION,
   GETTING_CRIMES,
   GOT_CRIMES,
+  SET_POLICE_API_LAST_UPDATED,
 } from './constants';
 
 import { getCrimesByBbox } from '../policeAPI';
@@ -65,3 +66,19 @@ export const setLocation = (location: any) => {
   };
 };
 
+const setPoliceAPILastUpdatedDate = (date: string) => {
+  return {
+    date,
+    type: SET_POLICE_API_LAST_UPDATED,
+  };
+}
+
+export const getPoliceAPILastUpdatedDate = () => {
+  return (dispatch: any) => {
+    return fetch('https://data.police.uk/api/crime-last-updated')
+      .then(_ => _.json())
+      .then(({ date }) => {
+        dispatch(setPoliceAPILastUpdatedDate(date));
+      });
+  }
+}

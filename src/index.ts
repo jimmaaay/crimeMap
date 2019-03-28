@@ -2,12 +2,15 @@ import './styles/main.scss';
 import mapInit from './map';
 import { store } from './store';
 import { watch } from './store/watch';
+import { getPoliceAPILastUpdatedDate } from './store/actions';
 
 import './components/SearchForm';
 import './components/MapFilter';
 
 (async () => {
   const { drawBox, fitBounds, setMarkers } = await mapInit();
+
+  store.dispatch(getPoliceAPILastUpdatedDate());
 
   watch(store, 'location', (location: any) => {
     const { bbox } = location;

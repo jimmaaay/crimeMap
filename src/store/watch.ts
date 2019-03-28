@@ -12,7 +12,8 @@ export const watch = (
     if (options.deepCompare === true) return isEqual(val1, val2);
     return val1 === val2;
   };
-  let previousValue: any = null;
+
+  let previousValue: any = get(store.getState(), key);
   return store.subscribe(() => {
     const state = store.getState();
     const value = get(state, key);
