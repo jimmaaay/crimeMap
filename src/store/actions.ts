@@ -6,9 +6,12 @@ import {
   GETTING_CRIMES,
   GOT_CRIMES,
   SET_POLICE_API_LAST_UPDATED,
+  SET_SEARCH_INPUT,
+  SET_SEARCH_SUGGESTIONS,
 } from './constants';
 
 import { getCrimesByBbox } from '../policeAPI';
+import { makeRequest } from '../geocoding';
 
 
 export const removeSelectedCategory = (category: string) => {
@@ -71,7 +74,7 @@ const setPoliceAPILastUpdatedDate = (date: string) => {
     date,
     type: SET_POLICE_API_LAST_UPDATED,
   };
-}
+};
 
 export const getPoliceAPILastUpdatedDate = () => {
   return (dispatch: any) => {
@@ -80,5 +83,33 @@ export const getPoliceAPILastUpdatedDate = () => {
       .then(({ date }) => {
         dispatch(setPoliceAPILastUpdatedDate(date));
       });
-  }
-}
+  };
+};
+
+
+export const setSearchInput = (searchInput: string) => {
+  return {
+    searchInput,
+    type: SET_SEARCH_INPUT,
+  };
+};
+
+export const setSearchSuggestons = (searchSuggestions: any[]) => {
+  return {
+    searchSuggestions,
+    type: SET_SEARCH_SUGGESTIONS,
+  };
+};
+
+// TODO: Look at cancelling makeRequest promise somehow
+export const getSearchSuggestions = () => {
+  return (dispatch: any, getState: Function) => {
+    const { searchInput } = getState();
+    makeRequest(searchInput)
+      .then((res) => {
+        const suggestions = res.features;
+        dispatch(setSearchSuggestons(suggestions));
+      })
+      .catch(console.log) // TODO: Show something to the user
+  };
+};

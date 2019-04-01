@@ -8,6 +8,8 @@ import {
   GOT_CRIMES,
   GETTING_CRIMES,
   SET_POLICE_API_LAST_UPDATED,
+  SET_SEARCH_INPUT,
+  SET_SEARCH_SUGGESTIONS,
 } from './constants';
 
 const initialState: any = {
@@ -18,6 +20,9 @@ const initialState: any = {
   crimes: [],
 
   policeAPILastUpdated: null,
+
+  searchInput: '',
+  searchSuggestions: [],
 };
 
 const reducer = (state = initialState, action: any) => {
@@ -85,7 +90,15 @@ const reducer = (state = initialState, action: any) => {
         month: parseInt(dateRegex.groups.month, 10) - 1,
         year: parseInt(dateRegex.groups.year, 10),
       };
-      return { ...state, date };
+      return { ...state, policeAPILastUpdated: date };
+    }
+
+    case SET_SEARCH_INPUT: {
+      return { ...state, searchInput: action.searchInput, searchSuggestions: [] };
+    }
+
+    case SET_SEARCH_SUGGESTIONS: {
+      return { ...state, searchSuggestions: action.searchSuggestions };
     }
 
     default:

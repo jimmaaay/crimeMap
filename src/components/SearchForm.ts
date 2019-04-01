@@ -1,29 +1,27 @@
 import { LitElement, html, css } from 'lit-element';
 import { connect } from 'pwa-helpers';
-import { isValidSearchRequest, makeRequest } from '../geocoding';
+import { isValidSearchRequest } from '../geocoding';
 import { store } from '../store';
-import { setLocation } from '../store/actions';
+import {
+  setLocation,
+  setSearchInput,
+  getSearchSuggestions,
+} from '../store/actions';
 
-const exampleResponse = require('../geocodingResponse.json');
-
-console.log(exampleResponse);
 class SearchForm extends connect(store)(LitElement) {
 
   private errorMessage: string;
   private inputValue: string;
   private timeout: number; // The timeout ID for the search input debouncer
-  private suggestions: any[];
+  private searchSuggestions: any[];
   private autocompleteOpen: boolean;
-
   private autocompleteDisplayTimeout: number;
-  
-  public events: any;
 
   static get properties() {
     return { 
       errorMessage: { type: String },
       inputValue: { type: String },
-      suggestions: { type: Array },
+      searchSuggestions: { type: Array },
       autocompleteOpen: { type: Boolean },
     };
   }
@@ -41,9 +39,12 @@ class SearchForm extends connect(store)(LitElement) {
   constructor() {
     super();
     this.errorMessage = '';
-    this.inputValue = '';
-    this.suggestions = exampleResponse.features;
     this.autocompleteOpen = false;
+  }
+
+  stateChanged(state: any) {
+    this.inputValue = state.searchInput;
+    this.searchSuggestions = state.searchSuggestions;
   }
 
 
@@ -54,22 +55,17 @@ class SearchForm extends connect(store)(LitElement) {
 
   searchInput(e: KeyboardEvent) {
     clearTimeout(this.timeout);
-    this.inputValue = (e.target as HTMLInputElement).value;
+    store.dispatch(setSearchInput((e.target as HTMLInputElement).value))
 
     const value = this.inputValue;
 
     this.errorMessage = '';
-    this.suggestions = [];
 
     const validRequest = isValidSearchRequest(value);
     if (validRequest !== true) return this.errorMessage = validRequest;
 
     this.timeout = window.setTimeout(() => {
-      makeRequest(value)
-      .then((res) => {
-        this.suggestions = res.features;
-      })
-      .catch(console.log)
+      store.dispatch(getSearchSuggestions());
     }, 300);
     
   }
@@ -79,7 +75,7 @@ class SearchForm extends connect(store)(LitElement) {
     const li = e.target.closest('.search-form__options__item');
     if (li == null) return;
     const { id } = (li as HTMLElement).dataset;
-    const item = this.suggestions.find((_) => _.id === id);
+    const item = this.searchSuggestions.find((_) => _.id === id);
 
     store.dispatch(setLocation(item));
     this.inputValue = item.text;
@@ -120,7 +116,7 @@ class SearchForm extends connect(store)(LitElement) {
         />
         ${/*<button type="submit" class="search-form__submit">Search</button>*/ ''}
         <ul class="${optionsClasses.join(' ')}" @click="${this.optionsClick}">
-          ${this.suggestions.map(({ text, id }) => {
+          ${this.searchSuggestions.map(({ text, id }) => {
             return html`<li
               data-id="${id}"
               class="search-form__options__item">
