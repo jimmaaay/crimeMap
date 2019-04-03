@@ -21,6 +21,8 @@ const initialState: any = {
 
   policeAPILastUpdated: null,
 
+  selectedMonthYear: null, // For the MapFilter
+
   searchInput: '',
   searchSuggestions: [],
 };
@@ -72,7 +74,15 @@ const reducer = (state = initialState, action: any) => {
     }
 
     case SET_LOCATION: {
-      return { ...state, location: action.location };
+      return {
+        ...state,
+        location: action.location,
+
+        // want the search input to contain text of selected location
+        searchInput: action.location.text,
+
+
+      };
     }
 
     case GETTING_CRIMES: {
@@ -90,7 +100,10 @@ const reducer = (state = initialState, action: any) => {
         month: parseInt(dateRegex.groups.month, 10) - 1,
         year: parseInt(dateRegex.groups.year, 10),
       };
-      return { ...state, policeAPILastUpdated: date };
+
+      const toReturn = { ...state, policeAPILastUpdated: date };
+      if (toReturn.selectedMonthYear === null) toReturn.selectedMonthYear = date;
+      return toReturn;
     }
 
     case SET_SEARCH_INPUT: {

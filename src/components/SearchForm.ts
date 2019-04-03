@@ -109,7 +109,7 @@ class SearchForm extends connect(store)(LitElement) {
         <input 
           type="search" 
           class="search-form__input"
-          value="${this.inputValue}"
+          .value="${this.inputValue}"
           @input="${this.searchInput}"
           @focus=${this.inputFocus}
           @blur="${this.inputBlur}"
