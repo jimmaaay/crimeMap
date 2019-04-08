@@ -8,6 +8,7 @@ import {
   SET_POLICE_API_LAST_UPDATED,
   SET_SEARCH_INPUT,
   SET_SEARCH_SUGGESTIONS,
+  SET_SELECTED_MONTH_YEAR,
 } from './constants';
 
 import { getCrimesByBbox } from '../policeAPI';
@@ -111,5 +112,14 @@ export const getSearchSuggestions = () => {
         dispatch(setSearchSuggestons(suggestions));
       })
       .catch(console.log) // TODO: Show something to the user
+  };
+};
+
+export const setSelectedFilterDate = (obj: { month: number, year: number }) => {
+  const { month, year } = obj;
+  return {
+    month,
+    year,
+    type: SET_SELECTED_MONTH_YEAR,
   };
 };

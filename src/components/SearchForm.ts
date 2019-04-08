@@ -6,7 +6,24 @@ import {
   setLocation,
   setSearchInput,
   getSearchSuggestions,
+  setSelectedFilterDate,
 } from '../store/actions';
+
+const MIN_YEAR = 2016;
+const MONTH_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+] ;
 
 class SearchForm extends connect(store)(LitElement) {
 
@@ -17,14 +34,22 @@ class SearchForm extends connect(store)(LitElement) {
   private autocompleteOpen: boolean;
   private autocompleteDisplayTimeout: number;
 
+  private selectedMonthYear: any;
+  private policeAPILastUpdated: any;
+
   static get properties() {
     return { 
       errorMessage: { type: String },
       inputValue: { type: String },
       searchSuggestions: { type: Array },
       autocompleteOpen: { type: Boolean },
+
+      policeAPILastUpdated: { type: Object },
+      selectedMonthYear: { type: Object },
     };
   }
+
+
 
   static styles = css`
     .search-form__options {
@@ -45,6 +70,69 @@ class SearchForm extends connect(store)(LitElement) {
   stateChanged(state: any) {
     this.inputValue = state.searchInput;
     this.searchSuggestions = state.searchSuggestions;
+
+    this.policeAPILastUpdated = state.policeAPILastUpdated;
+    this.selectedMonthYear = state.selectedMonthYear;
+  }
+
+  getMonthAndYearFilter() {
+    if (this.policeAPILastUpdated === null) return html``;
+    const { month, year } = this.policeAPILastUpdated;
+    const { month: selectedMonth, year:selectedYear } = this.selectedMonthYear;
+    const validYears = Array
+      .from(new Array(year - MIN_YEAR + 1))
+      .map((ignoreVar, i) => year - i);
+
+    const numberofMonths = year === selectedYear
+      ? month + 1
+      : 12;
+
+    const validMonths = Array
+      .from(new Array(numberofMonths))
+      .map((ignoreVar, i) => {
+        return MONTH_NAMES[i];
+      });
+
+    return html`
+      <select @change="${this.yearChange}">
+        ${validYears.map((year) => {
+          return html`
+            <option .value="${year}" ?selected=${selectedYear === year}>
+              ${year}
+            </option>
+          `;
+        })}
+      </select>
+      <select @change="${this.monthChange}">
+        ${validMonths.map((month, i) => {
+          return html`
+            <option .value="${i}" ?selected=${selectedMonth === month}>
+              ${month}
+            </option>
+          `;
+        })}
+      </select>
+    `;
+  }
+
+  yearChange(e: Event) {
+    const year = parseInt((e.target as HTMLSelectElement).value);
+    store.dispatch(
+      setSelectedFilterDate({
+        year, 
+        month: this.selectedMonthYear.month
+      })
+    );
+  }
+
+  monthChange(e: Event) {
+    const month = parseInt((e.target as HTMLSelectElement).value);
+    store.dispatch(
+      setSelectedFilterDate({
+        month, 
+        year: this.selectedMonthYear.year
+      })
+    );
   }
 
 
@@ -98,6 +186,7 @@ class SearchForm extends connect(store)(LitElement) {
   }
 
   render() {
+    const monthAndYearFilter = this.getMonthAndYearFilter();
     const optionsClasses = [
       'search-form__options',
       this.autocompleteOpen ? 'search-form__options--open' : '',
@@ -125,6 +214,7 @@ class SearchForm extends connect(store)(LitElement) {
           })}
         </ul>
       </form>
+      ${monthAndYearFilter}
     `;
   }
 

@@ -10,6 +10,7 @@ import {
   SET_POLICE_API_LAST_UPDATED,
   SET_SEARCH_INPUT,
   SET_SEARCH_SUGGESTIONS,
+  SET_SELECTED_MONTH_YEAR,
 } from './constants';
 
 const initialState: any = {
@@ -112,6 +113,16 @@ const reducer = (state = initialState, action: any) => {
 
     case SET_SEARCH_SUGGESTIONS: {
       return { ...state, searchSuggestions: action.searchSuggestions };
+    }
+
+    case SET_SELECTED_MONTH_YEAR: {
+      return {
+        ...state,
+        selectedMonthYear: {
+          month: action.month,
+          year: action.year,
+        },
+      }
     }
 
     default:
