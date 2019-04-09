@@ -17,10 +17,11 @@ const initialState: any = {
   categories: {},
   categoryNames: [],
   visibleCategories: [], // normally array
-  location: {}, // normally object
+  location: {},
   crimes: [],
 
   policeAPILastUpdated: null,
+  loadingCrimeData: false,
 
   selectedMonthYear: null, // For the MapFilter
 
@@ -87,11 +88,21 @@ const reducer = (state = initialState, action: any) => {
     }
 
     case GETTING_CRIMES: {
-      return { ...state, crimes:[], categoryNames: [], visibleCategories: []}
+      return {
+        ...state,
+        crimes:[],
+        categoryNames: [],
+        visibleCategories: [],
+        loadingCrimeData: true,
+      }
     }
 
     case GOT_CRIMES: {
-      return { ...state, crimes: action.crimes };
+      return {
+        ...state,
+        crimes: action.crimes,
+        loadingCrimeData: false,
+      };
     }
 
     case SET_POLICE_API_LAST_UPDATED: {

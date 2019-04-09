@@ -57,12 +57,13 @@ const setCategories = (categories: string[]) => {
 };
 
 export const setLocation = (location: any) => {
-  return (dispatch: any) => {
+  return (dispatch: any, getState: any) => {
     dispatch(setMapLocation(location));
     dispatch(gettingCrimes());
 
+    const { selectedMonthYear } = getState();
     const { bbox } = location;
-    return getCrimesByBbox(bbox).then((crimes) => {
+    return getCrimesByBbox(bbox, selectedMonthYear).then((crimes) => {
       const categories: any = [...new Set(crimes.map(({ category }: any) => category))];
       dispatch(gotCrimes(crimes));
       dispatch(setCategories(categories));

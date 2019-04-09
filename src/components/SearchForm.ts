@@ -34,6 +34,8 @@ class SearchForm extends connect(store)(LitElement) {
   private autocompleteOpen: boolean;
   private autocompleteDisplayTimeout: number;
 
+  private selectedLocation: any;
+
   private selectedMonthYear: any;
   private policeAPILastUpdated: any;
 
@@ -65,6 +67,7 @@ class SearchForm extends connect(store)(LitElement) {
     super();
     this.errorMessage = '';
     this.autocompleteOpen = false;
+    this.selectedLocation = false;
   }
 
   stateChanged(state: any) {
@@ -138,15 +141,17 @@ class SearchForm extends connect(store)(LitElement) {
 
   formSubmit(e: any) {
     e.preventDefault();
-    
+    if (this.selectedLocation === false) return;
+    store.dispatch(setLocation(this.selectedLocation));
   }
 
   searchInput(e: KeyboardEvent) {
+    const value = (e.target as HTMLInputElement).value
+
     clearTimeout(this.timeout);
-    store.dispatch(setSearchInput((e.target as HTMLInputElement).value))
+    store.dispatch(setSearchInput(value));
 
-    const value = this.inputValue;
-
+    this.selectedLocation = false;
     this.errorMessage = '';
 
     const validRequest = isValidSearchRequest(value);
@@ -165,8 +170,8 @@ class SearchForm extends connect(store)(LitElement) {
     const { id } = (li as HTMLElement).dataset;
     const item = this.searchSuggestions.find((_) => _.id === id);
 
-    store.dispatch(setLocation(item));
-    this.inputValue = item.text;
+    this.selectedLocation = item;
+    store.dispatch(setSearchInput(item.text));
   }
 
   inputFocus() {
@@ -203,7 +208,6 @@ class SearchForm extends connect(store)(LitElement) {
           @focus=${this.inputFocus}
           @blur="${this.inputBlur}"
         />
-        ${/*<button type="submit" class="search-form__submit">Search</button>*/ ''}
         <ul class="${optionsClasses.join(' ')}" @click="${this.optionsClick}">
           ${this.searchSuggestions.map(({ text, id }) => {
             return html`<li
@@ -213,8 +217,11 @@ class SearchForm extends connect(store)(LitElement) {
               </li>`;
           })}
         </ul>
+
+        ${monthAndYearFilter}
+
+        <button type="submit" class="search-form__submit">Search</button>
       </form>
-      ${monthAndYearFilter}
     `;
   }
 

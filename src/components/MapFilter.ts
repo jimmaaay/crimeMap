@@ -4,7 +4,7 @@ import { store } from '../store';
 import {
   removeSelectedCategory,
   addSelectedCategory,
-    setSelectedFilterDate,
+  setSelectedFilterDate,
 } from '../store/actions';
 
 class MapFilter extends connect(store)(LitElement) {
@@ -12,12 +12,14 @@ class MapFilter extends connect(store)(LitElement) {
   private categoryNames: any[];
   private visibleCategories: any[];
   private categories: any;
+  private loadingCrimeData: boolean;
 
   static get properties() {
     return { 
       categoryNames: { type: Array },
       visibleCategories: { type: Array },
       categories: { type: Object },
+      loadingCrimeData: { type: Boolean },
     };
   }
 
@@ -55,12 +57,34 @@ class MapFilter extends connect(store)(LitElement) {
       border: 2px solid #fff;
       background: #fff;
     }
+
+    .map-filter__loading {
+      width: 10rem;
+      height: 10rem;
+      margin: 0 auto;
+      border-radius: 50%;
+      border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+      border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+      border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+      border-left: 1.1em solid #ffffff;
+      animation: load 1.1s infinite linear;
+    }
+
+    @keyframes load {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
   `;
 
   stateChanged(state: any) {
     this.categoryNames = state.categoryNames;
     this.visibleCategories = state.visibleCategories;
     this.categories = state.categories;
+    this.loadingCrimeData = state.loadingCrimeData;
   }
 
   inputChange(e: any) {
@@ -79,8 +103,13 @@ class MapFilter extends connect(store)(LitElement) {
   
 
   render() {
+    const mapFilterClassNames = [
+      'map-filter',
+      !this.loadingCrimeData ? '' : 'map-filter--loading',
+    ];
     return html`
-      <div class="map-filter">
+      <div class="${mapFilterClassNames.join(' ')}">
+        <div class="map-filter__loading"></div>
         <ul class="map-filter__items" @change="${this.inputChange}">
           ${this.categoryNames.map((name) => {
             const isChecked = this.visibleCategories.includes(name);
