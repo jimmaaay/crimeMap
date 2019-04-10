@@ -1,11 +1,12 @@
 import { connect } from 'pwa-helpers';
-import { LitElement, html, css } from 'lit-element';
+import { LitElement, html, unsafeCSS } from 'lit-element';
 import { store } from '../store';
 import {
   removeSelectedCategory,
   addSelectedCategory,
   setSelectedFilterDate,
 } from '../store/actions';
+import css from './MapFilter.string.scss';
 
 class MapFilter extends connect(store)(LitElement) {
 
@@ -23,62 +24,7 @@ class MapFilter extends connect(store)(LitElement) {
     };
   }
 
-  static styles = css`
-    .map-filter__items {
-      margin: 0;
-      padding: 0;
-    }
-
-    .map-filter__item {
-      display: block;
-    }
-
-    .map-filter__item__label {
-      display: block;
-    }
-
-    .map-filter__item__label::before {
-      content: '';
-      display: inline-block;
-      width: 2rem;
-      height: 2rem;
-      background: var(--color);
-      vertical-align: middle;
-    }
-
-    .map-filter__item__input:checked + .map-filter__item__fake-checkbox {
-      background: red;
-    }
-
-    .map-filter__item__fake-checkbox {
-      display: inline-block;
-      width: 3rem;
-      height: 3rem;
-      border: 2px solid #fff;
-      background: #fff;
-    }
-
-    .map-filter__loading {
-      width: 10rem;
-      height: 10rem;
-      margin: 0 auto;
-      border-radius: 50%;
-      border-top: 1.1em solid rgba(255, 255, 255, 0.2);
-      border-right: 1.1em solid rgba(255, 255, 255, 0.2);
-      border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
-      border-left: 1.1em solid #ffffff;
-      animation: load 1.1s infinite linear;
-    }
-
-    @keyframes load {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-  `;
+  static styles = unsafeCSS(css.toString());
 
   stateChanged(state: any) {
     this.categoryNames = state.categoryNames;

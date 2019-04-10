@@ -18,7 +18,14 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.scss$/,
+        test: /\.string\.scss$/,
+        use: [
+          'css-loader',
+          'sass-loader',
+        ],
+      },
+      {
+        test: /(?<!\.string)\.scss$/,
         use: [
           'style-loader',
           'css-loader',
