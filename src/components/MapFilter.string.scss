@@ -1,4 +1,5 @@
 .map-filter {
+  display: none;
 
   &__items {
     margin: 0;
@@ -41,6 +42,7 @@
   }
 
   &__loading {
+    display: none;
     width: 10rem;
     height: 10rem;
     margin: 0 auto;
@@ -50,6 +52,22 @@
     border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
     border-left: 1.1em solid #ffffff;
     animation: load 1.1s infinite linear;
+  }
+
+  &--show {
+    display: block;
+  }
+
+  &--loading {
+
+    .map-filter {
+
+      &__loading {
+        display: block;
+      }
+
+    }
+
   }
 
 }

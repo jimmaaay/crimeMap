@@ -14,6 +14,7 @@ class MapFilter extends connect(store)(LitElement) {
   private visibleCategories: any[];
   private categories: any;
   private loadingCrimeData: boolean;
+  private showMapFilter: boolean;
 
   static get properties() {
     return { 
@@ -21,6 +22,7 @@ class MapFilter extends connect(store)(LitElement) {
       visibleCategories: { type: Array },
       categories: { type: Object },
       loadingCrimeData: { type: Boolean },
+      showMapFilter: { type: Boolean },
     };
   }
 
@@ -31,6 +33,7 @@ class MapFilter extends connect(store)(LitElement) {
     this.visibleCategories = state.visibleCategories;
     this.categories = state.categories;
     this.loadingCrimeData = state.loadingCrimeData;
+    this.showMapFilter = Object.keys(state.location).length !== 0;
   }
 
   inputChange(e: any) {
@@ -52,6 +55,7 @@ class MapFilter extends connect(store)(LitElement) {
     const mapFilterClassNames = [
       'map-filter',
       !this.loadingCrimeData ? '' : 'map-filter--loading',
+      !this.showMapFilter ? '' : 'map-filter--show',
     ];
     return html`
       <div class="${mapFilterClassNames.join(' ')}">

@@ -2,6 +2,17 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 
+const cssLoaders = [
+  'css-loader',
+  {
+    loader: 'postcss-loader',
+    options: {
+      plugins: [require('autoprefixer')],
+    },
+  },
+  'sass-loader',
+];
+
 module.exports = {
   entry: './src/index.ts',
   mode: 'development',
@@ -19,17 +30,13 @@ module.exports = {
       },
       {
         test: /\.string\.scss$/,
-        use: [
-          'css-loader',
-          'sass-loader',
-        ],
+        use: cssLoaders,
       },
       {
         test: /(?<!\.string)\.scss$/,
         use: [
           'style-loader',
-          'css-loader',
-          'sass-loader',
+          ...cssLoaders,
         ],
       },
       {

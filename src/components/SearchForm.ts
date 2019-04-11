@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'lit-element';
+import { LitElement, html, unsafeCSS } from 'lit-element';
 import { connect } from 'pwa-helpers';
 import { isValidSearchRequest } from '../geocoding';
 import { store } from '../store';
@@ -8,6 +8,7 @@ import {
   getSearchSuggestions,
   setSelectedFilterDate,
 } from '../store/actions';
+import css from './SearchForm.string.scss';
 
 const MIN_YEAR = 2016;
 const MONTH_NAMES = [
@@ -51,17 +52,7 @@ class SearchForm extends connect(store)(LitElement) {
     };
   }
 
-
-
-  static styles = css`
-    .search-form__options {
-      display: none;
-    }
-
-    .search-form__options--open {
-      display: block;
-    }
-  `;
+  static styles = unsafeCSS(css.toString());
 
   constructor() {
     super();
@@ -200,6 +191,7 @@ class SearchForm extends connect(store)(LitElement) {
     return html`
       <form class="search-form" @submit="${this.formSubmit}">
         ${this.errorMessage}
+        <div class="search-form__search">
         <input 
           type="search" 
           class="search-form__input"
@@ -208,15 +200,18 @@ class SearchForm extends connect(store)(LitElement) {
           @focus=${this.inputFocus}
           @blur="${this.inputBlur}"
         />
-        <ul class="${optionsClasses.join(' ')}" @click="${this.optionsClick}">
-          ${this.searchSuggestions.map(({ text, id }) => {
-            return html`<li
-              data-id="${id}"
-              class="search-form__options__item">
-                ${text}
-              </li>`;
-          })}
-        </ul>
+          <ul class="${optionsClasses.join(' ')}" @click="${this.optionsClick}">
+            ${this.searchSuggestions.map(({ text, id }) => {
+              return html`<li
+                data-id="${id}"
+                class="search-form__options__item">
+                  <button class="search-form__options__item__button" type="button">
+                    ${text}
+                  </button>
+                </li>`;
+            })}
+          </ul>
+        </div>
 
         ${monthAndYearFilter}
 
