@@ -39,6 +39,7 @@ class SearchForm extends connect(store)(LitElement) {
 
   private selectedMonthYear: any;
   private policeAPILastUpdated: any;
+  private loadingCrimeData: boolean;
 
   static get properties() {
     return { 
@@ -46,7 +47,7 @@ class SearchForm extends connect(store)(LitElement) {
       inputValue: { type: String },
       searchSuggestions: { type: Array },
       autocompleteOpen: { type: Boolean },
-
+      loadingCrimeData: { type: Boolean },
       policeAPILastUpdated: { type: Object },
       selectedMonthYear: { type: Object },
     };
@@ -64,7 +65,7 @@ class SearchForm extends connect(store)(LitElement) {
   stateChanged(state: any) {
     this.inputValue = state.searchInput;
     this.searchSuggestions = state.searchSuggestions;
-
+    this.loadingCrimeData = state.loadingCrimeData;
     this.policeAPILastUpdated = state.policeAPILastUpdated;
     this.selectedMonthYear = state.selectedMonthYear;
   }
@@ -88,7 +89,7 @@ class SearchForm extends connect(store)(LitElement) {
       });
 
     return html`
-      <select @change="${this.yearChange}">
+      <select class="search-form__year" @change="${this.yearChange}">
         ${validYears.map((year) => {
           return html`
             <option .value="${year}" ?selected=${selectedYear === year}>
@@ -97,7 +98,7 @@ class SearchForm extends connect(store)(LitElement) {
           `;
         })}
       </select>
-      <select @change="${this.monthChange}">
+      <select class="search-form__month" @change="${this.monthChange}">
         ${validMonths.map((month, i) => {
           return html`
             <option .value="${i}" ?selected=${selectedMonth === month}>
@@ -188,8 +189,12 @@ class SearchForm extends connect(store)(LitElement) {
       this.autocompleteOpen ? 'search-form__options--open' : '',
     ];
 
+    const className = this.loadingCrimeData
+      ? 'search-form search-form--loading'
+      : 'search-form'; 
+
     return html`
-      <form class="search-form" @submit="${this.formSubmit}">
+      <form class="${className}" @submit="${this.formSubmit}">
         ${this.errorMessage}
         <div class="search-form__search">
         <input 
@@ -215,7 +220,10 @@ class SearchForm extends connect(store)(LitElement) {
 
         ${monthAndYearFilter}
 
-        <button type="submit" class="search-form__submit">Search</button>
+        <button type="submit" class="search-form__submit">
+          Search
+          <div class="search-form__submit__loading"></div>
+        </button>
       </form>
     `;
   }
