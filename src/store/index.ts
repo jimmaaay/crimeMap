@@ -53,6 +53,15 @@ const reducer = (state = initialState, action: any) => {
         };
       });
 
+      Object.keys(categoriesObj).forEach((key) => {
+        const total = state.crimes.reduce((count: number, crime: any) => {
+          if (crime.category !== key) return count;
+          return (count + 1);
+        }, 0);
+
+        categoriesObj[key].total = total;
+      });
+
       return {
         ...state,
         categories: categoriesObj,
@@ -94,6 +103,7 @@ const reducer = (state = initialState, action: any) => {
         categoryNames: [],
         visibleCategories: [],
         loadingCrimeData: true,
+        crimeTotalsByCategory: {},
       }
     }
 

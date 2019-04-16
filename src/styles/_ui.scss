@@ -2,4 +2,19 @@
   position: absolute;
   top: 2rem;
   right: 2rem;
+  bottom: 2rem;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+
+  search-form,
+  map-filter {
+    display: block;
+    pointer-events: all;
+  }
+
+  map-filter {
+    overflow: auto;
+  }
+
 }

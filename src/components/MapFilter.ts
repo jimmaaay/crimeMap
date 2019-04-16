@@ -4,7 +4,6 @@ import { store } from '../store';
 import {
   removeSelectedCategory,
   addSelectedCategory,
-  setSelectedFilterDate,
 } from '../store/actions';
 import css from './MapFilter.string.scss';
 
@@ -49,8 +48,6 @@ class MapFilter extends connect(store)(LitElement) {
 
   }
 
-  
-
   render() {
     const mapFilterClassNames = [
       'map-filter',
@@ -63,7 +60,7 @@ class MapFilter extends connect(store)(LitElement) {
         <ul class="map-filter__items" @change="${this.inputChange}">
           ${this.categoryNames.map((name) => {
             const isChecked = this.visibleCategories.includes(name);
-            const { markerColour } = this.categories[name];
+            const { markerColour, total } = this.categories[name];
 
             return html`
               <li class="map-filter__item">
@@ -76,12 +73,17 @@ class MapFilter extends connect(store)(LitElement) {
                     .checked=${isChecked}
                   />
                   <span class="map-filter__item__fake-checkbox"></span>
-                  ${name}
+                  ${total} X ${name}
                 </label>
               </li>
             `;
           })}
         </ul>
+
+        <p class="map-filter__total">Total ${this.categoryNames.reduce((count, name) => {
+          const { total } = this.categories[name];
+          return count + total;
+        }, 0)}</p>
       </div>
     `;
   }

@@ -133,7 +133,7 @@ class SearchForm extends connect(store)(LitElement) {
 
   formSubmit(e: any) {
     e.preventDefault();
-    if (this.selectedLocation === false) return;
+    if (this.selectedLocation === false || this.loadingCrimeData) return;
     store.dispatch(setLocation(this.selectedLocation));
   }
 
@@ -193,6 +193,8 @@ class SearchForm extends connect(store)(LitElement) {
       ? 'search-form search-form--loading'
       : 'search-form'; 
 
+    const searchDisabled = this.selectedLocation === false;
+
     return html`
       <form class="${className}" @submit="${this.formSubmit}">
         ${this.errorMessage}
@@ -220,7 +222,7 @@ class SearchForm extends connect(store)(LitElement) {
 
         ${monthAndYearFilter}
 
-        <button type="submit" class="search-form__submit">
+        <button type="submit" class="search-form__submit" ?disabled=${searchDisabled}>
           Search
           <div class="search-form__submit__loading"></div>
         </button>

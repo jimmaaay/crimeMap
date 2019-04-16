@@ -1,44 +1,51 @@
 .map-filter {
   display: none;
   background: #fff;
+  padding: 0 1.5rem 2rem;
   // box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
 
   &__items {
-    margin: 0;
+    margin: 0 0 1rem;
     padding: 0;
   }
 
   &__item {
     display: block;
+    margin-bottom: 1.5rem;
 
     &__label {
-      display: block;
-
-      &::before {
-        content: '';
-        display: inline-block;
-        width: 2rem;
-        height: 2rem;
-        background: var(--color);
-        vertical-align: middle;
-      }
-
+      display: flex;
+      align-items: center;
+      position: relative;
+      cursor: pointer;
     }
 
     &__input {
+      margin: 0;
+      opacity: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2.6rem;
+      height: 2.6rem;
+      cursor: pointer;
 
       &:checked + .map-filter__item__fake-checkbox {
-        background: red;
+        background: var(--color);
       }
 
     }
 
     &__fake-checkbox {
       display: inline-block;
-      width: 3rem;
-      height: 3rem;
-      border: 2px solid #fff;
-      background: #fff;
+      width: 2.6rem;
+      height: 2.6rem;
+      background: #efefef;
+      margin-right: 1rem;
+    }
+
+    &__total {
+      margin: 0;
     }
 
   }
