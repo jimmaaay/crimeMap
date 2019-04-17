@@ -52,7 +52,7 @@ class MapFilter extends connect(store)(LitElement) {
     const mapFilterClassNames = [
       'map-filter',
       !this.loadingCrimeData ? '' : 'map-filter--loading',
-      !this.showMapFilter ? '' : 'map-filter--show',
+      !(this.showMapFilter && !this.loadingCrimeData)  ? '' : 'map-filter--show',
     ];
     return html`
       <div class="${mapFilterClassNames.join(' ')}">
