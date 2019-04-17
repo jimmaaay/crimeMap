@@ -1,4 +1,6 @@
-export const makeRequest = (search: string): Promise<any> => {
+import { GeocodingResponse } from '@/types';
+
+export const makeRequest = (search: string): Promise<GeocodingResponse> => {
   const endpoint = getRequestEndpoint(search);
   if (endpoint === false) return Promise.reject('Invalid search request');
 

@@ -12,19 +12,18 @@ import {
   SET_SEARCH_SUGGESTIONS,
   SET_SELECTED_MONTH_YEAR,
 } from './constants';
+import { State } from '@/types';
 
-const initialState: any = {
+
+const initialState: State = {
   categories: {},
   categoryNames: [],
-  visibleCategories: [], // normally array
-  location: {},
+  visibleCategories: [],
+  location: null,
   crimes: [],
-
   policeAPILastUpdated: null,
   loadingCrimeData: false,
-
   selectedMonthYear: null, // For the MapFilter
-
   searchInput: '',
   searchSuggestions: [],
 };
@@ -49,6 +48,7 @@ const reducer = (state = initialState, action: any) => {
         const colour = `rgb(${r}, ${g}, ${b})`;
 
         categoriesObj[category] = {
+          total: 0,
           markerColour: colour,
         };
       });
@@ -104,7 +104,7 @@ const reducer = (state = initialState, action: any) => {
         visibleCategories: [],
         loadingCrimeData: true,
         crimeTotalsByCategory: {},
-      }
+      } as State;
     }
 
     case GOT_CRIMES: {

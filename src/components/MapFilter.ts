@@ -32,7 +32,7 @@ class MapFilter extends connect(store)(LitElement) {
     this.visibleCategories = state.visibleCategories;
     this.categories = state.categories;
     this.loadingCrimeData = state.loadingCrimeData;
-    this.showMapFilter = Object.keys(state.location).length !== 0;
+    this.showMapFilter = state.location != null && Object.keys(state.location).length !== 0;
   }
 
   inputChange(e: any) {

@@ -3,6 +3,7 @@ import mapInit from './map';
 import { store } from './store';
 import { watch } from './store/watch';
 import { getPoliceAPILastUpdatedDate } from './store/actions';
+import { State } from './types';
 
 import './components/SearchForm';
 import './components/MapFilter';
@@ -12,7 +13,7 @@ import './components/MapFilter';
 
   store.dispatch(getPoliceAPILastUpdatedDate());
 
-  watch(store, 'location', (location: any) => {
+  watch(store, 'location', (location: State['location']) => {
     const { bbox } = location;
     drawBox([
       [bbox[0], bbox[1]],
@@ -23,7 +24,7 @@ import './components/MapFilter';
        // Have to explicitly give it the closing coords otherwise it can be buggy when drawing
       [bbox[0], bbox[1]],
     ]);
-    fitBounds(bbox);
+    fitBounds(bbox as any);
   });
   
   
@@ -31,7 +32,7 @@ import './components/MapFilter';
    * Only need to watch visibleCategories as these will be set when new crimes
    * are added to the store.
    */
-  watch(store, 'visibleCategories', (categories: string[]) => {
+  watch(store, 'visibleCategories', (categories: State['visibleCategories']) => {
     const { crimes } = store.getState();
     const markerData = crimes
       .filter(({ category }: any) => categories.includes(category))
