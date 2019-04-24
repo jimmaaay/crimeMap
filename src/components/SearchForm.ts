@@ -146,6 +146,8 @@ class SearchForm extends connect(store)(LitElement) {
     this.selectedLocation = false;
     this.errorMessage = '';
 
+    if (value.trim() === '') return; // User has cleared the input
+
     const validRequest = isValidSearchRequest(value);
     if (validRequest !== true) return this.errorMessage = validRequest;
 
