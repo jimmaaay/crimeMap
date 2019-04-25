@@ -129,7 +129,10 @@ const reducer = (state = initialState, action: any) => {
     }
 
     case SET_SEARCH_INPUT: {
-      return { ...state, searchInput: action.searchInput, searchSuggestions: [] };
+      const searchSuggestions = action.clearSuggestions 
+        ? []
+        : state.searchSuggestions;
+      return { ...state, searchSuggestions, searchInput: action.searchInput };
     }
 
     case SET_SEARCH_SUGGESTIONS: {

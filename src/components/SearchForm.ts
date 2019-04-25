@@ -24,7 +24,21 @@ const MONTH_NAMES = [
   'Oct',
   'Nov',
   'Dec',
-] ;
+];
+
+
+/**
+ * TODO: Fix bug that causes autocomplete suggestions not to show.
+ * 
+ * To reproduce:
+ * 
+ * 1. Keep input focused whilst searching for place
+ * 2. Press enter key on selected place (may have to use arrow keys)
+ * 3. After map has moved try searching for different place
+ * 4. Suggestions don't show up
+ * 
+ * Possible fix is to blur the input element after searching
+ */
 
 class SearchForm extends connect(store)(LitElement) {
 
@@ -32,6 +46,9 @@ class SearchForm extends connect(store)(LitElement) {
   private inputValue: string;
   private timeout: number; // The timeout ID for the search input debouncer
   private searchSuggestions: any[];
+
+  // highlighted item using keyboard arrows
+  private highlightedSearchSuggestion: string | null;
   private autocompleteOpen: boolean;
   private autocompleteDisplayTimeout: number;
 
@@ -50,6 +67,7 @@ class SearchForm extends connect(store)(LitElement) {
       loadingCrimeData: { type: Boolean },
       policeAPILastUpdated: { type: Object },
       selectedMonthYear: { type: Object },
+      highlightedSearchSuggestion: { type: [ null, String ]},
     };
   }
 
@@ -60,6 +78,7 @@ class SearchForm extends connect(store)(LitElement) {
     this.errorMessage = '';
     this.autocompleteOpen = false;
     this.selectedLocation = false;
+    this.highlightedSearchSuggestion = null;
   }
 
   stateChanged(state: any) {
@@ -135,10 +154,14 @@ class SearchForm extends connect(store)(LitElement) {
     e.preventDefault();
     if (this.selectedLocation === false || this.loadingCrimeData) return;
     store.dispatch(setLocation(this.selectedLocation));
+    clearTimeout(this.autocompleteDisplayTimeout);
+    this.autocompleteOpen = false;
   }
 
   searchInput(e: KeyboardEvent) {
-    const value = (e.target as HTMLInputElement).value
+    const value = (e.target as HTMLInputElement).value;
+
+    console.log('search input');
 
     clearTimeout(this.timeout);
     store.dispatch(setSearchInput(value));
@@ -155,6 +178,39 @@ class SearchForm extends connect(store)(LitElement) {
       store.dispatch(getSearchSuggestions());
     }, 300);
     
+  }
+
+  searchInputKeyDown(e: KeyboardEvent) {
+    if (! this.autocompleteOpen) return;
+    if (e.code !== 'ArrowDown' && e.code !== 'ArrowUp') return;
+    if (this.searchSuggestions.length === 0) return;
+    const indexModifier = e.code === 'ArrowDown' ? 1 : -1;
+    let nextSelectedItemIndex = null;
+    
+    if (indexModifier === -1 && this.highlightedSearchSuggestion === null) {
+      nextSelectedItemIndex = this.searchSuggestions.length - 1;
+    } else if (indexModifier === 1 && this.highlightedSearchSuggestion === null) {
+      nextSelectedItemIndex = 0;
+    } else {
+      const currentlySelectedItemIndex = this.searchSuggestions.findIndex((item) => {
+        return item.id === this.highlightedSearchSuggestion;
+      });
+  
+      nextSelectedItemIndex = currentlySelectedItemIndex + indexModifier;
+  
+      if (
+        nextSelectedItemIndex >= this.searchSuggestions.length ||
+        nextSelectedItemIndex < 0
+      ) {
+        this.highlightedSearchSuggestion = null;
+        return;
+      }
+    }
+
+    const selectedItem = this.searchSuggestions[nextSelectedItemIndex];
+    this.highlightedSearchSuggestion = selectedItem.id;
+    this.selectedLocation = selectedItem;
+    store.dispatch(setSearchInput(selectedItem.text, false));
   }
 
   optionsClick(e: MouseEvent) {
@@ -180,6 +236,7 @@ class SearchForm extends connect(store)(LitElement) {
      * to work, but it didn't 🤷
      */
     this.autocompleteDisplayTimeout = window.setTimeout(() => {
+      console.log('input blur');
       this.autocompleteOpen = false;
     }, 200);
   }
@@ -206,15 +263,22 @@ class SearchForm extends connect(store)(LitElement) {
           class="search-form__input"
           .value="${this.inputValue}"
           @input="${this.searchInput}"
+          @keydown="${this.searchInputKeyDown}"
           @focus=${this.inputFocus}
           @blur="${this.inputBlur}"
         />
           <ul class="${optionsClasses.join(' ')}" @click="${this.optionsClick}">
             ${this.searchSuggestions.map(({ text, id }) => {
-              return html`<li
-                data-id="${id}"
-                class="search-form__options__item">
-                  <button class="search-form__options__item__button" type="button">
+              const classNames = ['search-form__options__item__button'];
+              if (id === this.highlightedSearchSuggestion) {
+                classNames.push('search-form__options__item__button--highlighted');
+              }
+
+              return html`
+                <li
+                  data-id="${id}"
+                  class="search-form__options__item">
+                  <button class="${classNames.join(' ')}" type="button">
                     ${text}
                   </button>
                 </li>`;

@@ -89,9 +89,13 @@ export const getPoliceAPILastUpdatedDate = () => {
 };
 
 
-export const setSearchInput = (searchInput: string) => {
+export const setSearchInput = (
+  searchInput: string,
+  clearSuggestions: boolean = true,
+) => {
   return {
     searchInput,
+    clearSuggestions,
     type: SET_SEARCH_INPUT,
   };
 };

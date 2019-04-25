@@ -51,6 +51,7 @@ $loaderDimensions: 2.6rem;
         border: none;
         padding: 1rem;
 
+        &--highlighted,
         &:hover {
           background: #efefef;
         }
@@ -59,6 +60,7 @@ $loaderDimensions: 2.6rem;
       &:last-child {
         border-bottom: none;
       }
+
     }
 
     &--open {
