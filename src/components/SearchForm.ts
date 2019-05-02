@@ -26,20 +26,6 @@ const MONTH_NAMES = [
   'Dec',
 ];
 
-
-/**
- * TODO: Fix bug that causes autocomplete suggestions not to show.
- * 
- * To reproduce:
- * 
- * 1. Keep input focused whilst searching for place
- * 2. Press enter key on selected place (may have to use arrow keys)
- * 3. After map has moved try searching for different place
- * 4. Suggestions don't show up
- * 
- * Possible fix is to blur the input element after searching
- */
-
 class SearchForm extends connect(store)(LitElement) {
 
   private errorMessage: string;
@@ -156,12 +142,12 @@ class SearchForm extends connect(store)(LitElement) {
     store.dispatch(setLocation(this.selectedLocation));
     clearTimeout(this.autocompleteDisplayTimeout);
     this.autocompleteOpen = false;
+    const input = this.shadowRoot.querySelector('.search-form__input') as HTMLInputElement;
+    input.blur();
   }
 
   searchInput(e: KeyboardEvent) {
     const value = (e.target as HTMLInputElement).value;
-
-    console.log('search input');
 
     clearTimeout(this.timeout);
     store.dispatch(setSearchInput(value));
@@ -236,7 +222,6 @@ class SearchForm extends connect(store)(LitElement) {
      * to work, but it didn't 🤷
      */
     this.autocompleteDisplayTimeout = window.setTimeout(() => {
-      console.log('input blur');
       this.autocompleteOpen = false;
     }, 200);
   }
