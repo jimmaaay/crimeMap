@@ -42,27 +42,46 @@ export const getCrimesByBbox = async (bbox: any, { month, year }: any) => {
       });
   };
 
-  const splitBoundingBox = (boundingBox: any, numberToSplitBy: number) => {
-    if (numberToSplitBy === 0) return boundingBox;
+  // TODO: Test this by drawing a box round each bbox returned by this
+  const splitBoundingBox = (boundingBox: any, numberToSplitBy: number): any => {
+    if (numberToSplitBy === 0) return [boundingBox];
     const [ left, top, right, bottom ] = boundingBox;
-    const middleX = right - left / 2;
-    const middleY = top - bottom / 2;
-    
-    // const newBboxArray = righ
+    const xGap = right - left;
+    const yGap = top - bottom;
+    const middleX = left + xGap / 2;
+    const middleY = bottom + yGap / 2;
+
+    return [
+      splitBoundingBox([left, top, middleX, middleY], numberToSplitBy - 1), // top left
+      splitBoundingBox([middleX, top, right, middleY], numberToSplitBy - 1), // top right
+      splitBoundingBox([left, middleY, middleX, bottom], numberToSplitBy - 1), // bottom left
+      splitBoundingBox([middleX, middleY, right, bottom], numberToSplitBy - 1), // bottom right
+    ];
+
   };
-  
-  
+
   const formattedMonth = (month + 1).toString().padStart(2, '0');
+  const getQ1BBox = (array: any): any => {
+    if (! Array.isArray(array[0])) return array;
+    return getQ1BBox(array[0]);
+  }
   
 
   let isGood = false;
   let i = 0;
+  let boundingBoxArray
   while (!isGood) {
-    const boundingBox = splitBoundingBox(bbox, i);
-    const { lngMiles, latMiles } = getMilesFromLatLngs(bbox);
+    boundingBoxArray = splitBoundingBox(bbox, i);
+    console.log(boundingBoxArray);
+    const boundingBoxQ1 = getQ1BBox(boundingBoxArray);
+    const { lngMiles, latMiles } = getMilesFromLatLngs(boundingBoxQ1);
+    console.log(lngMiles, latMiles);
+    if (lngMiles < 7 && latMiles < 7) break;
     i++;
-    // if (lngMiles )
+    if (i === 5) break;
   }
+
+  console.log(boundingBoxArray);
 
 
   // return getData(bbox);
