@@ -2,6 +2,25 @@ import haversine from 'haversine';
 
 const ENDPOINT = 'https://data.police.uk/api/crimes-street/all-crime';
 
+
+// TODO: Test this by drawing a box round each bbox returned by this
+export const splitBoundingBox = (boundingBox: any, numberToSplitBy: number): any => {
+  if (numberToSplitBy === 0) return [boundingBox];
+  const [ left, top, right, bottom ] = boundingBox;
+  const xGap = right - left;
+  const yGap = top - bottom;
+  const middleX = left + xGap / 2;
+  const middleY = bottom + yGap / 2;
+
+  return [
+    splitBoundingBox([left, top, middleX, middleY], numberToSplitBy - 1), // top left
+    splitBoundingBox([middleX, top, right, middleY], numberToSplitBy - 1), // top right
+    splitBoundingBox([left, middleY, middleX, bottom], numberToSplitBy - 1), // bottom left
+    splitBoundingBox([middleX, middleY, right, bottom], numberToSplitBy - 1), // bottom right
+  ];
+
+};
+
 export const getCrimesByBbox = async (bbox: any, { month, year }: any) => {
 
   const getMilesFromLatLngs = (boundingBox: any) => {
@@ -42,23 +61,6 @@ export const getCrimesByBbox = async (bbox: any, { month, year }: any) => {
       });
   };
 
-  // TODO: Test this by drawing a box round each bbox returned by this
-  const splitBoundingBox = (boundingBox: any, numberToSplitBy: number): any => {
-    if (numberToSplitBy === 0) return [boundingBox];
-    const [ left, top, right, bottom ] = boundingBox;
-    const xGap = right - left;
-    const yGap = top - bottom;
-    const middleX = left + xGap / 2;
-    const middleY = bottom + yGap / 2;
-
-    return [
-      splitBoundingBox([left, top, middleX, middleY], numberToSplitBy - 1), // top left
-      splitBoundingBox([middleX, top, right, middleY], numberToSplitBy - 1), // top right
-      splitBoundingBox([left, middleY, middleX, bottom], numberToSplitBy - 1), // bottom left
-      splitBoundingBox([middleX, middleY, right, bottom], numberToSplitBy - 1), // bottom right
-    ];
-
-  };
 
   const formattedMonth = (month + 1).toString().padStart(2, '0');
   const getQ1BBox = (array: any): any => {
