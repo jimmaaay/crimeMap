@@ -5,7 +5,7 @@ const ENDPOINT = 'https://data.police.uk/api/crimes-street/all-crime';
 
 // TODO: Test this by drawing a box round each bbox returned by this
 export const splitBoundingBox = (boundingBox: any, numberToSplitBy: number): any => {
-  if (numberToSplitBy === 0) return [boundingBox];
+  if (numberToSplitBy === 0) return boundingBox;
   const [ left, top, right, bottom ] = boundingBox;
   const xGap = right - left;
   const yGap = top - bottom;
@@ -39,10 +39,10 @@ export const getCrimesByBbox = async (bbox: any, { month, year }: any) => {
 
   const getData = (boundingBox: any) => {
     const points = [
-      [bbox[0], bbox[1]],
-      [bbox[2], bbox[1]],
-      [bbox[2], bbox[3]],
-      [bbox[0], bbox[3]],
+      [boundingBox[0], boundingBox[1]],
+      [boundingBox[2], boundingBox[1]],
+      [boundingBox[2], boundingBox[3]],
+      [boundingBox[0], boundingBox[3]],
     ];
     const poly = points.map(([ lng, lat ]) => {
       return `${lat},${lng}`
@@ -74,16 +74,37 @@ export const getCrimesByBbox = async (bbox: any, { month, year }: any) => {
   let boundingBoxArray
   while (!isGood) {
     boundingBoxArray = splitBoundingBox(bbox, i);
-    console.log(boundingBoxArray);
     const boundingBoxQ1 = getQ1BBox(boundingBoxArray);
     const { lngMiles, latMiles } = getMilesFromLatLngs(boundingBoxQ1);
-    console.log(lngMiles, latMiles);
     if (lngMiles < 7 && latMiles < 7) break;
     i++;
-    if (i === 5) break;
   }
 
-  console.log(boundingBoxArray);
+  let flattenedBoundingBoxes = boundingBoxArray.flat(i - 1);
+  if (! Array.isArray(flattenedBoundingBoxes[0])) {
+    flattenedBoundingBoxes = [flattenedBoundingBoxes];
+  }
+
+  console.log(bbox);
+  console.log(flattenedBoundingBoxes);
+
+  // flattenedBoundingBoxes.forEach(([left, top, right, bottom]) => {
+  //   setTimeout(() => {
+  //     window.drawThingyBox(left, top, right, bottom);
+  //   }, 1000);
+  // });
+
+  const allQuadrants = Promise.all(
+    flattenedBoundingBoxes.map((fbbox) => getData(fbbox))
+  ).then((res) => {
+    console.log(res);
+  })
+  .catch((err) => {
+    console.log(err);
+  })
+
+  // console.log(flattenedBoundingBoxes);
+  // console.log(flattenedBoundingBoxes);
 
 
   // return getData(bbox);

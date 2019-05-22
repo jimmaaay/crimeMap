@@ -90,6 +90,52 @@ export default async () => {
 
   }
 
+  window.drawThingyBox = (left, top, right, bottom) => {
+    // [bbox[0], bbox[1]],
+    //   [bbox[2], bbox[1]],
+    //   [bbox[2], bbox[3]],
+    //   [bbox[0], bbox[3]],
+  
+    //    // Have to explicitly give it the closing coords otherwise it can be buggy when drawing
+    //   [bbox[0], bbox[1]],
+
+    const id = (Math.random() * 100000).toString();
+
+    const coordinates = [
+      [left, top],
+      [right, top],
+      [right, bottom],
+      [left, bottom],
+      [left, top],
+    ];
+
+    const sourceData: any = {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [coordinates]
+      }
+    };
+  
+      const bboxSource: any = {
+        type: 'geojson',
+        data: sourceData,
+      };
+
+      map.addSource(id, bboxSource);
+
+      map.addLayer({
+        id,
+        type: 'fill',
+        source: id,
+        layout: {},
+        paint: {
+          'fill-color': '#'+Math.floor(Math.random()*16777215).toString(16),
+        },
+      });
+
+  }
+
   /**
    * Will center and zoom the map based on the bounding box
    */
