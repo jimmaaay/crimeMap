@@ -1,4 +1,5 @@
 import haversine from 'haversine';
+import pMap from 'p-map';
 
 const ENDPOINT = 'https://data.police.uk/api/crimes-street/all-crime';
 
@@ -37,7 +38,7 @@ export const getCrimesByBbox = async (bbox: any, { month, year }: any) => {
     };
   }
 
-  const getData = (boundingBox: any) => {
+  const getData = (boundingBox: any): any => {
     const points = [
       [boundingBox[0], boundingBox[1]],
       [boundingBox[2], boundingBox[1]],
@@ -88,25 +89,26 @@ export const getCrimesByBbox = async (bbox: any, { month, year }: any) => {
   console.log(bbox);
   console.log(flattenedBoundingBoxes);
 
-  // flattenedBoundingBoxes.forEach(([left, top, right, bottom]) => {
-  //   setTimeout(() => {
-  //     window.drawThingyBox(left, top, right, bottom);
-  //   }, 1000);
-  // });
 
-  const allQuadrants = Promise.all(
-    flattenedBoundingBoxes.map((fbbox) => getData(fbbox))
-  ).then((res) => {
-    console.log(res);
-  })
-  .catch((err) => {
-    console.log(err);
-  })
+  const mapper = (arg1: boolean | number[], arg2: number[] | number): any => {
+    const boundingBox = typeof arg1 === 'boolean' ? arg2 : arg1;
+    const isNestedMapper = arg1 === true;
+  
+    return getData(boundingBox)
+      .catch(async (err: Error) => {
+        // Seem to get 503 errors when there is too much crime in an area
+        if (!isNestedMapper && err.message === '503') {
+          const nestedMapper = mapper.bind(this, true);
+          const splitQuadrant = splitBoundingBox(boundingBox, 1);
+          const quadrantData = await pMap(splitQuadrant, mapper, { concurrency: 2 });
+          return (quadrantData as any).flat();
+        }
+        return [];
+      });
+  };
 
-  // console.log(flattenedBoundingBoxes);
-  // console.log(flattenedBoundingBoxes);
-
-
-  // return getData(bbox);
+  return pMap(flattenedBoundingBoxes, mapper, { concurrency: 3 })
+    .then((data: any) => data.flat())
+    .catch((err) => console.log(err));
 
 }

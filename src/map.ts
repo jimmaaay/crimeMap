@@ -90,7 +90,7 @@ export default async () => {
 
   }
 
-  window.drawThingyBox = (left, top, right, bottom) => {
+  (window as any).drawThingyBox = (left: number, top: number, right: number, bottom: number) => {
     // [bbox[0], bbox[1]],
     //   [bbox[2], bbox[1]],
     //   [bbox[2], bbox[3]],
