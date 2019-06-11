@@ -86,10 +86,6 @@ export const getCrimesByBbox = async (bbox: any, { month, year }: any) => {
     flattenedBoundingBoxes = [flattenedBoundingBoxes];
   }
 
-  console.log(bbox);
-  console.log(flattenedBoundingBoxes);
-
-
   const mapper = (arg1: boolean | number[], arg2: number[] | number): any => {
     const boundingBox = typeof arg1 === 'boolean' ? arg2 : arg1;
     const isNestedMapper = arg1 === true;

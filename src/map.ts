@@ -219,17 +219,13 @@ export default async () => {
 
   }
 
-
-  map
-    .on('click', 'markers', (e) => {
-      console.log(e, e.features);
-    })
-    .on('mouseenter', 'markers', () => {
-      map.getCanvas().style.cursor = 'pointer';
-    })
-    .on('mouseleave', 'markers', () => {
-      map.getCanvas().style.cursor = '';
-    });
+  // map
+  //   .on('mouseenter', 'markers', () => {
+  //     map.getCanvas().style.cursor = 'pointer';
+  //   })
+  //   .on('mouseleave', 'markers', () => {
+  //     map.getCanvas().style.cursor = '';
+  //   });
 
 
   return {
