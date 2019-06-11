@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
+const PRODUCTION = process.env.NODE_ENV === 'production';
 
 const cssLoaders = [
   'css-loader',
@@ -15,8 +16,8 @@ const cssLoaders = [
 
 module.exports = {
   entry: './src/index.ts',
-  mode: 'development',
-  devtool: 'inline-source-map',
+  mode: PRODUCTION ? 'production' : 'development',
+  devtool: PRODUCTION ? 'source-map' : 'inline-source-map',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
