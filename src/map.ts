@@ -1,5 +1,6 @@
 import * as mapboxgl from 'mapbox-gl';
 import { LngLatBoundsLike } from 'mapbox-gl';
+import haversine from 'haversine';
 import markerUrl from './marker.png';
 import { store } from './store';
 
@@ -175,11 +176,82 @@ export default async () => {
       existingMarkers.push(category);
     });
 
+
+    let markersToShow: any[] = markers;
+
+    const groupedIds = new Set();
+    const groups: Group[] = [];
+
+    class Group {
+      public markers: any[];
+      public initialPosition: any;
+
+      constructor(initialPosition: any) {
+        this.markers = [];
+        this.initialPosition = initialPosition;
+      }
+
+      addMarker(marker: MapMarker) {
+        this.markers.push(marker);
+      }
+
+      shouldMarkerBeInGroup(marker: MapMarker) {
+        const milesDiff = haversine(
+          {
+            longitude: marker.lng,
+            latitude: marker.lat,
+          },
+          {
+            longitude: this.initialPosition.lng,
+            latitude: this.initialPosition.lat,
+          },
+          { unit: 'mile' },
+        );
+
+        return milesDiff < 1;
+      }
+    }
+
+    for (let i = 0; i < markers.length; i++) {
+      const marker = markers[i];
+      let hasBeenAddedToGroup = false;
+
+      for (let j = 0; j < groups.length; j++) {
+        const group = groups[j];
+        if (group.shouldMarkerBeInGroup(marker)) {
+          group.addMarker(marker);
+          hasBeenAddedToGroup = true;
+          break;
+        }
+      }
+
+      if (!hasBeenAddedToGroup) {
+        const group = new Group({
+          lat: marker.lat,
+          lng: marker.lng,
+        });
+
+        groups.push(group);
+      }
+
+    }
+
+    markersToShow = groups.map((group) => {
+      console.log(`Group has ${group.markers.length} items`);
+      return {
+        lat: group.initialPosition.lat,
+        lng: group.initialPosition.lng,
+        category: 'burglary',
+        persistendID: (Math.random() * 10000).toString(),
+      };
+    });
+
+
     const layerExists = map.getLayer('markers') !== undefined;
     const source = map.getSource('markers') as mapboxgl.GeoJSONSource || undefined;
     const markerSourceData: any = {
       type: 'FeatureCollection',
-      features: markers.map(({ lat, lng, category, persistendID }, i) => {
+      features: markersToShow.map(({ lat, lng, category, persistendID }, i) => {
         return {
           type: 'Feature',
           geometry: {
