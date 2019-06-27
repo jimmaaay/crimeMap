@@ -52,3 +52,10 @@ export interface GeocodingResponse {
   features: MapboxPlace[];
   attribution: string;
 };
+
+export interface MapMarker {
+  lat: any;
+  lng: any;
+  category: string;
+  persistendID: string;
+}

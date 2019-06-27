@@ -3,16 +3,12 @@ import { LngLatBoundsLike } from 'mapbox-gl';
 import haversine from 'haversine';
 import markerUrl from './marker.png';
 import { store } from './store';
+import { MapMarker } from './types';
 
 (mapboxgl as any).accessToken = process.env.MAPBOX_ACCESS_TOKEN;
 
 
-interface MapMarker {
-  lat: any;
-  lng: any;
-  category: string;
-  persistendID: string;
-}
+
 
 const createColouredMarker = (
   image: HTMLImageElement,
@@ -231,6 +227,7 @@ export default async () => {
           lng: marker.lng,
         });
 
+        group.addMarker(marker);
         groups.push(group);
       }
 
