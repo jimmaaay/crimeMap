@@ -99,7 +99,7 @@ export default async () => {
 
 
 
-  let currentMarkers = [];
+  let currentMarkers: MapMarker[] = [];
   /**
    * Will add an array of markers to the map.
    * 
@@ -135,7 +135,7 @@ export default async () => {
     currentMarkers = markers;
 
     const groups = getMarkerGroups(markers);
-    console.log(groups);
+    markersToShow = groups;
 
     const layerExists = map.getLayer('markers') !== undefined;
     const source = map.getSource('markers') as mapboxgl.GeoJSONSource || undefined;
@@ -188,7 +188,7 @@ export default async () => {
   
     const groups: Group[] = [];
 
-    console.log(bounds, window.innerWidth);
+    // console.log(bounds, window.innerWidth);
 
     class Group {
       public markers: any[];
@@ -239,8 +239,8 @@ export default async () => {
         const west = this.bounds.getWest();
 
         return (
-          marker.lng >= west
-          && marker.lng <= east
+          marker.lng >= east
+          && marker.lng <= west
           && marker.lat >= south
           && marker.lat <= north
         );
@@ -273,7 +273,7 @@ export default async () => {
     }
 
     const markersToShow = groups.map((group) => {
-      console.log(`Group has ${group.markers.length} items`);
+      // console.log(`Group has ${group.markers.length} items`);
       return {
         lat: group.initialPosition.lat,
         lng: group.initialPosition.lng,
@@ -284,6 +284,40 @@ export default async () => {
 
     return markersToShow;
   }
+
+
+  let prevZoom = 0;
+
+  map.on('zoom', () => {
+    const zoom = Math.floor(map.getZoom());
+    if (prevZoom === zoom) return;
+    if (currentMarkers.length === 0) return;
+    prevZoom = zoom;
+
+    const groups = getMarkerGroups(currentMarkers);
+
+    const source = map.getSource('markers') as mapboxgl.GeoJSONSource || undefined;
+    const markerSourceData: any = {
+      type: 'FeatureCollection',
+      features: groups.map(({ lat, lng, category, persistendID }, i) => {
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [lng, lat]
+          },
+          properties: {
+            persistendID,
+            'marker-category': category,
+          },
+        };
+      }),
+    };
+
+    source.setData(markerSourceData);
+    
+    // console.log(zoom);
+  });
 
   return {
     drawBox,
