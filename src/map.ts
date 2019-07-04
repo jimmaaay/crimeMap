@@ -87,52 +87,6 @@ export default async () => {
 
   }
 
-  (window as any).drawThingyBox = (left: number, top: number, right: number, bottom: number) => {
-    // [bbox[0], bbox[1]],
-    //   [bbox[2], bbox[1]],
-    //   [bbox[2], bbox[3]],
-    //   [bbox[0], bbox[3]],
-  
-    //    // Have to explicitly give it the closing coords otherwise it can be buggy when drawing
-    //   [bbox[0], bbox[1]],
-
-    const id = (Math.random() * 100000).toString();
-
-    const coordinates = [
-      [left, top],
-      [right, top],
-      [right, bottom],
-      [left, bottom],
-      [left, top],
-    ];
-
-    const sourceData: any = {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [coordinates]
-      }
-    };
-  
-      const bboxSource: any = {
-        type: 'geojson',
-        data: sourceData,
-      };
-
-      map.addSource(id, bboxSource);
-
-      map.addLayer({
-        id,
-        type: 'fill',
-        source: id,
-        layout: {},
-        paint: {
-          'fill-color': '#'+Math.floor(Math.random()*16777215).toString(16),
-        },
-      });
-
-  }
-
   /**
    * Will center and zoom the map based on the bounding box
    */
@@ -142,6 +96,10 @@ export default async () => {
     });
   }
 
+
+
+
+  let currentMarkers = [];
   /**
    * Will add an array of markers to the map.
    * 
@@ -174,75 +132,10 @@ export default async () => {
 
 
     let markersToShow: any[] = markers;
+    currentMarkers = markers;
 
-    const groupedIds = new Set();
-    const groups: Group[] = [];
-
-    class Group {
-      public markers: any[];
-      public initialPosition: any;
-
-      constructor(initialPosition: any) {
-        this.markers = [];
-        this.initialPosition = initialPosition;
-      }
-
-      addMarker(marker: MapMarker) {
-        this.markers.push(marker);
-      }
-
-      shouldMarkerBeInGroup(marker: MapMarker) {
-        const milesDiff = haversine(
-          {
-            longitude: marker.lng,
-            latitude: marker.lat,
-          },
-          {
-            longitude: this.initialPosition.lng,
-            latitude: this.initialPosition.lat,
-          },
-          { unit: 'mile' },
-        );
-
-        return milesDiff < 1;
-      }
-    }
-
-    for (let i = 0; i < markers.length; i++) {
-      const marker = markers[i];
-      let hasBeenAddedToGroup = false;
-
-      for (let j = 0; j < groups.length; j++) {
-        const group = groups[j];
-        if (group.shouldMarkerBeInGroup(marker)) {
-          group.addMarker(marker);
-          hasBeenAddedToGroup = true;
-          break;
-        }
-      }
-
-      if (!hasBeenAddedToGroup) {
-        const group = new Group({
-          lat: marker.lat,
-          lng: marker.lng,
-        });
-
-        group.addMarker(marker);
-        groups.push(group);
-      }
-
-    }
-
-    markersToShow = groups.map((group) => {
-      console.log(`Group has ${group.markers.length} items`);
-      return {
-        lat: group.initialPosition.lat,
-        lng: group.initialPosition.lng,
-        category: 'burglary',
-        persistendID: (Math.random() * 10000).toString(),
-      };
-    });
-
+    const groups = getMarkerGroups(markers);
+    console.log(groups);
 
     const layerExists = map.getLayer('markers') !== undefined;
     const source = map.getSource('markers') as mapboxgl.GeoJSONSource || undefined;
@@ -288,14 +181,109 @@ export default async () => {
 
   }
 
-  // map
-  //   .on('mouseenter', 'markers', () => {
-  //     map.getCanvas().style.cursor = 'pointer';
-  //   })
-  //   .on('mouseleave', 'markers', () => {
-  //     map.getCanvas().style.cursor = '';
-  //   });
+  const getMarkerGroups = (markers: MapMarker[]) => {
+    const bounds = map.getBounds();
+    const GROUP_WIDTH = 100;
 
+  
+    const groups: Group[] = [];
+
+    console.log(bounds, window.innerWidth);
+
+    class Group {
+      public markers: any[];
+      public initialPosition: any;
+      private bounds: mapboxgl.LngLatBounds;
+
+      constructor(initialPosition: any) {
+        this.markers = [];
+        this.initialPosition = initialPosition;
+        this.getBounds();
+      }
+
+      addMarker(marker: MapMarker) {
+        this.markers.push(marker);
+      }
+
+      getBounds() {
+        // Convert latLng to pixels
+        const point = map.project({
+          lat: this.initialPosition.lat,
+          lon: this.initialPosition.lng,
+        });
+
+        const radius = GROUP_WIDTH / 2;
+        
+        const northEastPoint = {
+          x: point.x - radius,
+          y: point.y - radius,
+        } as mapboxgl.PointLike;
+
+        const southWestPoint = {
+          x: point.x + radius,
+          y: point.y + radius,
+        } as mapboxgl.PointLike;
+
+        const bounds = new mapboxgl.LngLatBounds(
+          map.unproject(southWestPoint), // convert back to latLng
+          map.unproject(northEastPoint), // convert back to latLng
+        );
+
+        this.bounds = bounds;
+      }
+
+      shouldMarkerBeInGroup(marker: MapMarker) {
+        const north = this.bounds.getNorth();
+        const east = this.bounds.getEast();
+        const south = this.bounds.getSouth();
+        const west = this.bounds.getWest();
+
+        return (
+          marker.lng >= west
+          && marker.lng <= east
+          && marker.lat >= south
+          && marker.lat <= north
+        );
+      }
+    }
+
+    for (let i = 0; i < markers.length; i++) {
+      const marker = markers[i];
+      let hasBeenAddedToGroup = false;
+
+      for (let j = 0; j < groups.length; j++) {
+        const group = groups[j];
+        if (group.shouldMarkerBeInGroup(marker)) {
+          group.addMarker(marker);
+          hasBeenAddedToGroup = true;
+          break;
+        }
+      }
+
+      if (!hasBeenAddedToGroup) {
+        const group = new Group({
+          lat: marker.lat,
+          lng: marker.lng,
+        });
+
+        group.addMarker(marker);
+        groups.push(group);
+      }
+
+    }
+
+    const markersToShow = groups.map((group) => {
+      console.log(`Group has ${group.markers.length} items`);
+      return {
+        lat: group.initialPosition.lat,
+        lng: group.initialPosition.lng,
+        category: 'burglary',
+        persistendID: (Math.random() * 10000).toString(),
+      };
+    });
+
+    return markersToShow;
+  }
 
   return {
     drawBox,
